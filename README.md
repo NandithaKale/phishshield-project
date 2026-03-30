@@ -1,22 +1,28 @@
-dont use phases in this9:27 PMRan a command, created a file, read a fileRan a command, created a file, read a fileDone! The README now covers everything from the planning doc — architecture, modules, API design, database schema, extension, error handling, and team roles — with no mention of phases. Just replace your-username in the clone URL before pushing to GitHub.ReadmeDocument · MD Downloadhey i want you to like remove feature statue9:29 PMEdited a file, read a fileEdited a file, read a fileDone! The features status table has been removed. Everything else stays the same.ReadmeDocument · MD Downloadgive here only n i hope you retain the features9:29 PMHere's the updated README:
-🛡️ PhishShield — Intelligent Phishing Detection System
+# 🛡️ PhishShield — Intelligent Phishing Detection System
 
-A machine learning-based cybersecurity system that detects phishing URLs, emails, and SMS messages with real-time risk classification, explainable AI, and a browser extension.
+> A machine learning-based cybersecurity system that detects phishing URLs, emails, and SMS messages with real-time risk classification, explainable AI, and a browser extension.
 
+---
 
-📌 Overview
-PhishShield analyzes URLs and text messages to predict whether they are Safe or Phishing, complete with confidence scores and explanations. Built with a modular architecture, it covers everything from a Flask backend and ML model to a Chrome extension for real-time browser-based detection.
+## 📌 Overview
 
-🎯 Objectives
+PhishShield analyzes URLs and text messages to predict whether they are **Safe** or **Phishing**, complete with confidence scores and explanations. Built with a modular architecture, it covers everything from a Flask backend and ML model to a Chrome extension for real-time browser-based detection.
 
-Detect phishing URLs using machine learning
-Provide Explainable AI outputs (why a URL is flagged)
-Extend detection to email and SMS messages
-Build a browser extension for real-time detection
-Store and display detection history
+---
 
+## 🎯 Objectives
 
-🧠 System Architecture
+- Detect phishing URLs using machine learning
+- Provide **Explainable AI** outputs (why a URL is flagged)
+- Extend detection to **email and SMS** messages
+- Build a **browser extension** for real-time detection
+- Store and display detection history
+
+---
+
+## 🧠 System Architecture
+
+```
 ┌─────────────────────────────────┐
 │       Presentation Layer        │  Web UI / Browser Extension
 ├─────────────────────────────────┤
@@ -26,7 +32,11 @@ Store and display detection history
 ├─────────────────────────────────┤
 │          Database Layer         │  Detection History Storage
 └─────────────────────────────────┘
-🔄 Request Workflow
+```
+
+### 🔄 Request Workflow
+
+```
 User Input (Web / Extension)
         ↓
   Backend API receives request
@@ -38,8 +48,13 @@ User Input (Web / Extension)
   Result + Confidence + Explanation
         ↓
   Display to user & store in DB
+```
 
-📂 Project Structure
+---
+
+## 📂 Project Structure
+
+```
 phishshield/
 │
 ├── backend/
@@ -86,79 +101,164 @@ phishshield/
 │
 ├── requirements.txt
 └── README.md
+```
 
-⚙️ Core Modules
-🔹 Feature Extraction
-All feature logic is centralized in shared/feature_extractor.py and extracts:
-FeatureDescriptionURL lengthTotal character countDot countNumber of . in URLHTTPS presenceSecure protocol check@ symbolCommon phishing indicatorHyphen countNumber of - in domainIP addressDirect IP usage detectionSuspicious patterns//, redirects, etc.Digit ratioProportion of digits in URL
-🔹 Machine Learning
-PropertyDetailPrimary ModelRandom Forest ClassifierBaselineLogistic RegressionOptionalXGBoostPrimary MetricF1 Score (target ≥ 0.90)Dataset Size50,000+ URLsData Split70% Train / 15% Val / 15% TestLabels0 = Safe, 1 = Phishing
-🔹 API Endpoints
-URL Detection
+---
+
+## ⚙️ Core Modules
+
+### 🔹 Feature Extraction
+All feature logic is centralized in `shared/feature_extractor.py` and extracts:
+
+| Feature | Description |
+|---|---|
+| URL length | Total character count |
+| Dot count | Number of `.` in URL |
+| HTTPS presence | Secure protocol check |
+| `@` symbol | Common phishing indicator |
+| Hyphen count | Number of `-` in domain |
+| IP address | Direct IP usage detection |
+| Suspicious patterns | `//`, redirects, etc. |
+| Digit ratio | Proportion of digits in URL |
+
+### 🔹 Machine Learning
+
+| Property | Detail |
+|---|---|
+| Primary Model | Random Forest Classifier |
+| Baseline | Logistic Regression |
+| Optional | XGBoost |
+| Primary Metric | F1 Score (target ≥ 0.90) |
+| Dataset Size | 50,000+ URLs |
+| Data Split | 70% Train / 15% Val / 15% Test |
+| Labels | `0` = Safe, `1` = Phishing |
+
+### 🔹 API Endpoints
+
+**URL Detection**
+```
 POST /predict
-json{ "url": "http://example.com" }
+```
+```json
+// Request
+{ "url": "http://example.com" }
+
+// Response
 { "result": "phishing", "confidence": 0.94, "reason": "Contains suspicious symbols" }
 ```
 
 **Text / SMS / Email Detection**
 ```
 POST /predict-text
-json{ "text": "Your account has been suspended" }
+```
+```json
+// Request
+{ "text": "Your account has been suspended" }
+
+// Response
 { "result": "phishing", "confidence": 0.88 }
-🔹 Database Schema
-Table: detections
-FieldTypeDescriptionidPrimary KeyAuto-incrementinput_valueStringURL or text inputinput_typeStringurl or textresultStringsafe or phishingconfidenceFloatModel confidence scoretimestampDateTimeTime of detection
-🔹 Browser Extension
+```
 
-Trigger: Button click on current page
-Flow: Captures active tab URL → sends to backend → displays result in popup
-Permissions required: activeTab, scripting
+### 🔹 Database Schema
 
-🔹 Explainable AI
+Table: `detections`
 
-Uses SHAP or rule-based explanation
-Returns top features influencing each prediction
-Displayed in both the web UI and extension popup
+| Field | Type | Description |
+|---|---|---|
+| `id` | Primary Key | Auto-increment |
+| `input_value` | String | URL or text input |
+| `input_type` | String | `url` or `text` |
+| `result` | String | `safe` or `phishing` |
+| `confidence` | Float | Model confidence score |
+| `timestamp` | DateTime | Time of detection |
 
+### 🔹 Browser Extension
 
-🛡️ Error Handling
-ScenarioBehaviorInvalid URLReturns error messageEmpty inputValidation errorLow confidenceMarked as "Uncertain"Backend failureFallback message shown
+- **Trigger:** Button click on current page
+- **Flow:** Captures active tab URL → sends to backend → displays result in popup
+- **Permissions required:** `activeTab`, `scripting`
 
-🛠️ Tech Stack
-Show Image
-Show Image
-Show Image
-Show Image
-Show Image
-Show Image
+### 🔹 Explainable AI
 
-ML: Python, scikit-learn, pandas, numpy, SHAP
-Backend: Flask
-Frontend: HTML, CSS, JavaScript
-Extension: Chrome Extension API (Manifest V3)
-Database: SQLite / configurable
-Deployment: Flask dev server → Render / Railway (optional)
+- Uses **SHAP** or rule-based explanation
+- Returns top features influencing each prediction
+- Displayed in both the web UI and extension popup
 
+---
 
-👥 Team
-RoleResponsibilitiesML DeveloperDataset preprocessing, feature engineering, model training & evaluationBackend DeveloperFlask API development, DB integration, model servingFrontend DeveloperUI design, API integration, Chrome extension
+## 🛡️ Error Handling
 
-▶️ Getting Started
-1. Clone the repository
-bashgit clone https://github.com/your-username/phishshield.git
+| Scenario | Behavior |
+|---|---|
+| Invalid URL | Returns error message |
+| Empty input | Validation error |
+| Low confidence | Marked as "Uncertain" |
+| Backend failure | Fallback message shown |
+
+---
+
+## 🛠️ Tech Stack
+
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat&logo=scikit-learn&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-000000?style=flat&logo=flask&logoColor=white)
+![HTML](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat&logo=sqlite&logoColor=white)
+
+- **ML:** Python, scikit-learn, pandas, numpy, SHAP
+- **Backend:** Flask
+- **Frontend:** HTML, CSS, JavaScript
+- **Extension:** Chrome Extension API (Manifest V3)
+- **Database:** SQLite / configurable
+- **Deployment:** Flask dev server → Render / Railway *(optional)*
+
+---
+
+## 👥 Team
+
+| Role | Responsibilities |
+|---|---|
+| ML Developer | Dataset preprocessing, feature engineering, model training & evaluation |
+| Backend Developer | Flask API development, DB integration, model serving |
+| Frontend Developer | UI design, API integration, Chrome extension |
+
+---
+
+## ▶️ Getting Started
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/your-username/phishshield.git
 cd phishshield
-2. Install dependencies
-bashpip install -r requirements.txt
-3. Train the model
-bashpython ml_model/src/train_url_model.py
-4. Start the backend
-bashpython backend/app.py
-5. Load the Chrome extension
+```
 
-Open chrome://extensions/
-Enable Developer Mode
-Click Load Unpacked → select the extension/ folder
+**2. Install dependencies**
+```bash
+pip install -r requirements.txt
+```
 
+**3. Train the model**
+```bash
+python ml_model/src/train_url_model.py
+```
 
-🏆 Conclusion
+**4. Start the backend**
+```bash
+python backend/app.py
+```
+
+**5. Load the Chrome extension**
+- Open `chrome://extensions/`
+- Enable **Developer Mode**
+- Click **Load Unpacked** → select the `extension/` folder
+
+---
+
+## 🏆 Conclusion
+
 PhishShield is a scalable and modular phishing detection system with a clean separation of concerns across ML, backend, frontend, and browser layers. It combines strong model performance with explainability and multi-input support to deliver a practical, real-world cybersecurity tool.
+
+---
+
+> ⭐ Star this repo if you found it useful!
