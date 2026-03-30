@@ -1,360 +1,248 @@
-🛡️ PhishShield - Intelligent Phishing Detection System
+# 🛡️ PhishShield — Intelligent Phishing Detection System
 
-📌 Introduction
+> A machine learning-based cybersecurity system that detects phishing URLs with real-time risk classification and confidence scoring.
 
+---
 
+## 📌 Overview
 
-PhishShield is a machine learning-based cybersecurity system designed to detect phishing attacks in URLs. The system analyzes structural and lexical features of URLs and predicts whether they are Safe, Moderate Risk, or Phishing.
+PhishShield analyzes structural and lexical features of URLs to predict whether they are **Safe**, **Moderate Risk**, or **Phishing**. Built with a modular and scalable architecture, it is designed to extend into a full real-world application with a backend API, browser extension, and multi-platform phishing detection.
 
+---
 
+## 🎯 Objectives
 
-The project follows a modular and scalable architecture and is designed to be extended into a full real-world application including backend APIs, browser extensions, and multi-platform phishing detection.
+- Detect phishing URLs using machine learning
+- Provide risk-based classification with confidence scores
+- Build a scalable system (ML + Backend + Frontend)
+- Extend detection to a browser extension for real-time use
+- Provide explainability for model predictions *(future scope)*
 
+---
 
+## 🧠 System Architecture
 
-🎯 Objectives
+PhishShield follows a layered architecture:
 
-Detect phishing URLs using machine learning
+```
+┌─────────────────────────────────┐
+│       Presentation Layer        │  Web UI / Browser Extension
+├─────────────────────────────────┤
+│          API Layer              │  Flask Backend
+├─────────────────────────────────┤
+│    Machine Learning Layer       │  Feature Extraction + Random Forest
+├─────────────────────────────────┤
+│          Data Layer             │  URL History & Results (planned)
+└─────────────────────────────────┘
+```
 
-Provide risk-based classification with confidence score
+### 🔄 Request Workflow
 
-Build a scalable system architecture (ML + Backend + Frontend)
-
-Extend detection to browser extension and real-time usage
-
-Provide explainability for predictions (future scope)
-
-🧠 System Architecture
-
-
-
-PhishShield follows a layered architecture similar to real-world systems:
-
-
-
-🔹 Layers
-
-Presentation Layer
-
-Web interface / Browser extension
-
-Accepts user input (URL)
-
-API Layer (Backend)
-
-Handles requests using Flask
-
-Communicates with ML model
-
-Machine Learning Layer
-
+```
+User Input (URL)
+      ↓
+Backend receives request
+      ↓
 Feature extraction
-
-Model prediction (Random Forest)
-
-Risk scoring
-
-Data Layer
-
-Stores URL history and results (future scope)
-
-🔄 System Workflow
-
-User enters or visits a URL
-
-Request is sent to backend
-
-URL features are extracted
-
+      ↓
 ML model predicts probability
-
-Risk classification is applied
-
-Result is returned with confidence
-
+      ↓
+Risk classification applied
+      ↓
+Result returned with confidence score
+      ↓
 (Optional) Data stored for history
+```
 
-📂 Project Structure
+---
 
+## 📂 Project Structure
 
-
-phishshield\_project/
-
-
-
+```
+phishshield_project/
 │
-
-├── ml\_model/
-
-│ ├── dataset/
-
-│ │ └── phishing\_dataset.csv
-
-│ │
-
-│ ├── src/
-
-│ │ ├── train\_url\_model.py
-
-│ │ ├── predict\_url.py
-
-│ │ └── model\_utils.py
-
-│ │
-
-│ └── saved\_model/
-
-│ └── url\_model.pkl
-
-
-
+├── ml_model/
+│   ├── dataset/
+│   │   └── phishing_dataset.csv
+│   ├── src/
+│   │   ├── train_url_model.py
+│   │   ├── predict_url.py
+│   │   └── model_utils.py
+│   └── saved_model/
+│       └── url_model.pkl
 │
-
 ├── backend/
-
-│ ├── app.py
-
-│ ├── routes/
-
-│ │ ├── url\_routes.py
-
-│ │ ├── email\_routes.py
-
-│ │ └── sms\_routes.py
-
-│ │
-
-│ ├── services/
-
-│ │ ├── prediction\_service.py
-
-│ │ ├── explainability\_service.py
-
-│ │ └── history\_service.py
-
-│ │
-
-│ └── database/
-
-│ └── db\_config.py
-
-
-
+│   ├── app.py
+│   ├── routes/
+│   │   ├── url_routes.py
+│   │   ├── email_routes.py
+│   │   └── sms_routes.py
+│   ├── services/
+│   │   ├── prediction_service.py
+│   │   ├── explainability_service.py
+│   │   └── history_service.py
+│   └── database/
+│       └── db_config.py
 │
-
 ├── frontend/
-
-│ ├── templates/
-
-│ │ ├── index.html
-
-│ │ ├── result.html
-
-│ │ └── dashboard.html
-
-│ │
-
-│ └── static/
-
-│ ├── css/
-
-│ └── js/
-
-
-
+│   ├── templates/
+│   │   ├── index.html
+│   │   ├── result.html
+│   │   └── dashboard.html
+│   └── static/
+│       ├── css/
+│       └── js/
 │
-
 ├── extension/
-
-│ ├── manifest.json
-
-│ ├── popup.html
-
-│ ├── popup.js
-
-│ └── background.js
-
-
-
+│   ├── manifest.json
+│   ├── popup.html
+│   ├── popup.js
+│   └── background.js
 │
-
 ├── shared/
-
-│ ├── feature\_extractor.py
-
-│ ├── utils.py
-
-│ └── constants.py
-
-
-
+│   ├── feature_extractor.py
+│   ├── utils.py
+│   └── constants.py
 │
-
 ├── requirements.txt
-
 └── README.md
-
-
-
-⚙️ Core Modules
-
-🔹 Feature Extraction Module
-
-
-
-Extracts important URL features such as:
-
-
-
-URL length
-
-Number of dots, digits, special characters
-
-Presence of HTTPS
-
-Suspicious keywords (login, verify, bank, etc.)
-
-Suspicious domain extensions (.xyz, .tk, .ml, etc.)
-
-🔹 Machine Learning Module
-
-Algorithm: Random Forest Classifier
-
-Input: Extracted URL features
-
-Output: Probability of phishing
-
-🔹 Risk Classification Module
-
-0–30% → Safe
-
-30–70% → Moderate Risk
-
-70–100% → Phishing
-
-🔹 Backend API Module (Planned)
-
-Flask-based API
-
-Handles prediction requests
-
-Connects frontend with ML model
-
-🔹 Browser Extension Module (Planned)
-
-Detects current website URL
-
-Sends request to backend
-
-Displays real-time phishing warning
-
-🔹 Explainability Module (Future)
-
-Explains why a URL is flagged
-
-Highlights suspicious features
-
-🤖 Machine Learning Workflow
-
-Training Phase
-
-Load dataset
-
-Extract features
-
-Train Random Forest model
-
-Save trained model (.pkl)
-
-Prediction Phase
-
-Input URL
-
-Extract features
-
-Load trained model
-
-Predict probability
-
-Convert to risk level
-
-📊 Model Performance
-
-Accuracy : \~84% (training dataset)
-
-Accuracy (test cases) : \~96.67%
-
-Precision: 1.0
-
-Recall : 0.93
-
-F1 Score : 0.96
-
-🚀 Features
-
-✅ Implemented
-
-URL phishing detection
-
-Feature engineering
-
-ML model training and prediction
-
-Confidence score output
-
-Risk-based classification
-
-🔄 In Progress
-
-Flask backend API
-
-Frontend UI integration
-
-🔮 Future Enhancements
-
-Browser extension
-
-Email/SMS phishing detection
-
-Explainable AI
-
-Dashboard for analytics
-
-Database integration
-
-🛠️ Tech Stack
-
-Python
-
-scikit-learn
-
-pandas, numpy
-
-Flask (planned)
-
-HTML, CSS, JavaScript (planned)
-
-▶️ How to Run
-
-Install dependencies
-
+```
+
+---
+
+## ⚙️ Core Modules
+
+### 🔹 Feature Extraction
+Extracts key URL attributes including:
+- URL length
+- Number of dots, digits, and special characters
+- Presence of HTTPS
+- Suspicious keywords (e.g., `login`, `verify`, `bank`)
+- Suspicious TLDs (e.g., `.xyz`, `.tk`, `.ml`)
+
+### 🔹 Machine Learning
+| Property | Detail |
+|---|---|
+| Algorithm | Random Forest Classifier |
+| Input | Extracted URL features |
+| Output | Phishing probability score |
+
+### 🔹 Risk Classification
+| Confidence Score | Classification |
+|---|---|
+| 0% – 30% | ✅ Safe |
+| 30% – 70% | ⚠️ Moderate Risk |
+| 70% – 100% | 🚨 Phishing |
+
+### 🔹 Backend API *(Planned)*
+Flask-based REST API connecting the frontend to the ML model.
+
+### 🔹 Browser Extension *(Planned)*
+Detects the current page URL, sends it to the backend, and displays a real-time warning.
+
+### 🔹 Explainability Module *(Future)*
+Highlights which URL features triggered the phishing classification.
+
+---
+
+## 🤖 ML Workflow
+
+```
+Training Phase                  Prediction Phase
+──────────────                  ────────────────
+Load dataset          →         Input URL
+Extract features      →         Extract features
+Train Random Forest   →         Load saved model (.pkl)
+Save model (.pkl)     →         Predict probability
+                                Convert to risk level
+```
+
+---
+
+## 📊 Model Performance
+
+| Metric | Score |
+|---|---|
+| Accuracy (Training) | ~84% |
+| Accuracy (Test Cases) | ~96.67% |
+| Precision | 1.0 |
+| Recall | 0.93 |
+| F1 Score | 0.96 |
+
+---
+
+## 🚀 Features
+
+| Status | Feature |
+|---|---|
+| ✅ Done | URL phishing detection |
+| ✅ Done | Feature engineering |
+| ✅ Done | ML model training & prediction |
+| ✅ Done | Confidence score output |
+| ✅ Done | Risk-based classification |
+| 🔄 In Progress | Flask backend API |
+| 🔄 In Progress | Frontend UI integration |
+| 🔮 Planned | Browser extension |
+| 🔮 Planned | Email / SMS phishing detection |
+| 🔮 Planned | Explainable AI |
+| 🔮 Planned | Analytics dashboard |
+| 🔮 Planned | Database integration |
+
+---
+
+## 🛠️ Tech Stack
+
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat&logo=scikit-learn&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-000000?style=flat&logo=flask&logoColor=white)
+![HTML](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
+
+- **ML:** Python, scikit-learn, pandas, numpy
+- **Backend:** Flask *(planned)*
+- **Frontend:** HTML, CSS, JavaScript *(planned)*
+
+---
+
+## ▶️ Getting Started
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/your-username/phishshield.git
+cd phishshield
+```
+
+**2. Install dependencies**
+```bash
 pip install -r requirements.txt
+```
 
-Train model
+**3. Train the model**
+```bash
+python ml_model/src/train_url_model.py
+```
 
-python ml\_model/src/train\_url\_model.py
+**4. Run a prediction**
+```bash
+python ml_model/src/predict_url.py
+```
 
-👥 Team Roles
+---
 
-ML Developer: Feature engineering, model training, evaluation
+## 👥 Team
 
-Backend Developer: API development and integration
+| Role | Responsibilities |
+|---|---|
+| ML Developer | Feature engineering, model training, evaluation |
+| Backend Developer | API development and integration |
+| Frontend Developer | UI design and user interaction |
 
-Frontend Developer: UI and user interaction
+---
 
-🏆 Conclusion
+## 🏆 Conclusion
 
+PhishShield is a scalable and intelligent phishing detection system that leverages machine learning to identify malicious URLs. The current system demonstrates strong performance and provides a solid foundation for building a complete, real-world cybersecurity product.
 
+---
 
-PhishShield is a scalable and intelligent phishing detection system that leverages machine learning to identify malicious URLs. The current system demonstrates strong performance and provides a foundation for building a complete cybersecurity solution with real-world applications.
-
+> ⭐ Star this repo if you found it useful!
