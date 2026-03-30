@@ -26,6 +26,19 @@ It follows a modular architecture integrating:
 
 ---
 
+## 🚀 Features
+
+- 🔍 Real-time phishing detection for URLs
+- 📩 Email and SMS phishing analysis
+- 📊 Confidence score with each prediction
+- 🧠 Explainable AI insights (why flagged)
+- 🌐 Chrome extension for live browsing protection
+- 🗂️ Detection history storage and retrieval
+- ⚡ Fast API responses using Flask backend
+- 📈 Scalable modular architecture
+
+---
+
 ## 🧠 System Architecture
 
 ```
@@ -304,7 +317,3 @@ python backend/app.py
 PhishShield is a scalable and modular phishing detection system combining machine learning, explainability, and real-time browser integration.
 
 It is designed as a practical, real-world cybersecurity solution.
-
----
-
-t with others
