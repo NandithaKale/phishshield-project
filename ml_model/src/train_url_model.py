@@ -76,8 +76,17 @@ model.fit(X_train, y_train)
 accuracy = model.score(X_test, y_test)
 
 # SAVE MODEL
-pickle.dump(model, open("ml_model/saved_model/url_model.pkl", "wb"))
+#pickle.dump(model, open("ml_model/saved_model/url_model.pkl", "wb"))
+import os
 
+save_path = "ml_model/saved_model/url_model.pkl"
+
+# Create folder if it doesn't exist
+os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+# Save model
+with open(save_path, "wb") as f:
+    pickle.dump(model, f)
 # =========================
 # PREDICTION FUNCTION
 # =========================
