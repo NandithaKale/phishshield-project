@@ -1279,32 +1279,41 @@
 
   let isSafeDemo = false;
 
-  function checkURL() {
-    const input = document.getElementById('urlInput').value.trim();
-    if (!input) {
-      document.getElementById('urlInput').focus();
-      document.getElementById('urlInput').style.borderColor = 'var(--accent2)';
-      setTimeout(() => {
-        document.getElementById('urlInput').style.borderColor = 'var(--border)';
-      }, 800);
-      return;
-    }
+ async function checkURL() {
+  const input = document.getElementById('urlInput').value.trim();
 
-    // Show spinner
-    document.getElementById('spinner').classList.add('show');
-
-    setTimeout(() => {
-      document.getElementById('spinner').classList.remove('show');
-
-      // Decide result (simple heuristic for demo)
-      const isPhishing = input.includes('verify') || input.includes('secure') ||
-                         input.includes('login') || input.includes('account') ||
-                         !input.startsWith('https://www.') ||
-                         input.includes('.tk') || input.includes('.xyz');
-
-      showResult(input, isPhishing, isPhishing ? Math.floor(70 + Math.random()*25) : Math.floor(5 + Math.random()*20));
-    }, 1800);
+  if (!input) {
+    alert("Enter a URL");
+    return;
   }
+
+  document.getElementById('spinner').classList.add('show');
+
+  try {
+    const response = await fetch("http://127.0.0.1:5000/predict", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ url: input })
+    });
+
+    const data = await response.json();
+
+    document.getElementById('spinner').classList.remove('show');
+
+    const isPhishing = data.is_phishing;
+    const score = Math.floor(data.confidence * 100);
+
+    showResult(input, isPhishing, score);
+
+  } catch (error) {
+    document.getElementById('spinner').classList.remove('show');
+    alert("Backend not running or error occurred");
+    console.error(error);
+  }
+}
+
 
   function demoSafe() {
     isSafeDemo = !isSafeDemo;
