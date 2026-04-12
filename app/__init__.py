@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-
+from flask_cors import CORS   # 🔥 ADD THIS
 db = SQLAlchemy()
 
 def create_app():
@@ -8,6 +8,8 @@ def create_app():
 
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    CORS(app)   # 🔥 ADD THIS LINE
 
     db.init_app(app)
 
