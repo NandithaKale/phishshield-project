@@ -31,7 +31,6 @@
     overflow-x: hidden;
   }
 
-  /* ── Grid background ── */
   body::before {
     content: '';
     position: fixed;
@@ -44,7 +43,6 @@
     z-index: 0;
   }
 
-  /* ── NAV ── */
   nav {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -69,16 +67,9 @@
     cursor: pointer;
   }
 
-  .logo-shield {
-    width: 28px; height: 32px;
-    position: relative;
-  }
-
   .logo svg { width: 28px; height: 32px; }
 
-  nav ul {
-    display: flex; gap: 32px; list-style: none;
-  }
+  nav ul { display: flex; gap: 32px; list-style: none; }
 
   nav ul li a {
     color: var(--muted);
@@ -93,11 +84,10 @@
 
   nav ul li a:hover, nav ul li a.active { color: var(--accent); }
 
-  /* ── PAGES ── */
   .page { display: none; position: relative; z-index: 1; }
   .page.active { display: block; }
 
-  /* ══════════════ HOME PAGE ══════════════ */
+  /* ══ HOME ══ */
   #home {
     min-height: 100vh;
     display: flex;
@@ -160,7 +150,6 @@
     animation: fadeUp 0.6s 0.2s ease both;
   }
 
-  /* ── URL Input card ── */
   .input-card {
     margin-top: 52px;
     width: 100%;
@@ -192,10 +181,7 @@
     display: block;
   }
 
-  .input-row {
-    display: flex;
-    gap: 12px;
-  }
+  .input-row { display: flex; gap: 12px; }
 
   .url-input {
     flex: 1;
@@ -211,7 +197,6 @@
   }
 
   .url-input::placeholder { color: var(--muted); }
-
   .url-input:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(0,229,255,0.08);
@@ -254,7 +239,22 @@
     font-family: var(--mono);
   }
 
-  /* ── Stats row ── */
+  /* error state */
+  .error-box {
+    display: none;
+    margin-top: 14px;
+    background: rgba(255,60,92,0.07);
+    border: 1px solid rgba(255,60,92,0.3);
+    border-left: 3px solid var(--accent2);
+    padding: 12px 16px;
+    font-size: 0.82rem;
+    color: var(--accent2);
+    font-family: var(--mono);
+    border-radius: 0 2px 2px 0;
+  }
+
+  .error-box.show { display: block; }
+
   .stats-row {
     margin-top: 72px;
     display: flex;
@@ -288,7 +288,6 @@
     margin-top: 4px;
   }
 
-  /* ── Feature pills ── */
   .features-row {
     margin-top: 48px;
     display: flex;
@@ -310,7 +309,7 @@
     letter-spacing: 1px;
   }
 
-  /* ══════════════ RESULT PAGE ══════════════ */
+  /* ══ RESULT ══ */
   #result {
     min-height: 100vh;
     padding: 120px 24px 80px;
@@ -319,10 +318,7 @@
     align-items: center;
   }
 
-  .result-header {
-    text-align: center;
-    margin-bottom: 40px;
-  }
+  .result-header { text-align: center; margin-bottom: 40px; }
 
   .result-url-display {
     font-family: var(--mono);
@@ -339,14 +335,8 @@
   }
 
   .result-url-display span { color: var(--accent); }
+  .result-title { font-size: 1.8rem; font-weight: 700; margin-top: 8px; }
 
-  .result-title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-top: 8px;
-  }
-
-  /* verdict card */
   .verdict-card {
     width: 100%;
     max-width: 680px;
@@ -366,6 +356,11 @@
     box-shadow: 0 0 40px rgba(0,230,118,0.08);
   }
 
+  .verdict-card.warning {
+    border: 1px solid rgba(255,184,0,0.4);
+    box-shadow: 0 0 40px rgba(255,184,0,0.08);
+  }
+
   .verdict-banner {
     padding: 24px 32px;
     display: flex;
@@ -383,10 +378,12 @@
     border-bottom: 1px solid rgba(0,230,118,0.2);
   }
 
-  .verdict-icon {
-    font-size: 2.5rem;
-    line-height: 1;
+  .verdict-card.warning .verdict-banner {
+    background: rgba(255,184,0,0.06);
+    border-bottom: 1px solid rgba(255,184,0,0.2);
   }
+
+  .verdict-icon { font-size: 2.5rem; line-height: 1; }
 
   .verdict-label {
     font-size: 1.6rem;
@@ -396,12 +393,9 @@
 
   .verdict-card.phishing .verdict-label { color: var(--accent2); }
   .verdict-card.safe .verdict-label { color: var(--safe); }
+  .verdict-card.warning .verdict-label { color: var(--warn); }
 
-  .verdict-sub {
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-top: 2px;
-  }
+  .verdict-sub { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
 
   .verdict-body {
     background: var(--surface);
@@ -411,7 +405,6 @@
     gap: 24px;
   }
 
-  /* risk meter */
   .risk-section { grid-column: 1 / -1; }
 
   .risk-label-row {
@@ -433,7 +426,6 @@
     font-family: var(--mono);
     font-size: 2rem;
     font-weight: 700;
-    color: var(--accent2);
   }
 
   .risk-bar-track {
@@ -447,15 +439,11 @@
     height: 100%;
     border-radius: 2px;
     transition: width 1s cubic-bezier(0.4,0,0.2,1);
-    background: linear-gradient(90deg, var(--warn), var(--accent2));
   }
 
-  .risk-bar-fill.safe-fill {
-    background: linear-gradient(90deg, #00c853, var(--safe));
-  }
-
-  /* detail items */
-  .detail-item { }
+  .risk-bar-fill.phishing-fill { background: linear-gradient(90deg, var(--warn), var(--accent2)); }
+  .risk-bar-fill.safe-fill { background: linear-gradient(90deg, #00c853, var(--safe)); }
+  .risk-bar-fill.warning-fill { background: linear-gradient(90deg, #e65100, var(--warn)); }
 
   .detail-key {
     font-family: var(--mono);
@@ -466,12 +454,7 @@
     margin-bottom: 4px;
   }
 
-  .detail-val {
-    font-size: 0.9rem;
-    color: var(--text);
-    font-weight: 500;
-  }
-
+  .detail-val { font-size: 0.9rem; color: var(--text); font-weight: 500; }
   .detail-val.bad { color: var(--accent2); }
   .detail-val.ok { color: var(--safe); }
   .detail-val.warn { color: var(--warn); }
@@ -496,7 +479,7 @@
     background: linear-gradient(90deg, var(--accent2), transparent);
   }
 
-  .reasons-card .card-head {
+  .card-head {
     padding: 16px 28px;
     border-bottom: 1px solid var(--border);
     font-family: var(--mono);
@@ -523,23 +506,21 @@
     line-height: 1.5;
   }
 
-  .reason-icon {
-    font-size: 1rem;
-    margin-top: 1px;
-    flex-shrink: 0;
-  }
+  .reason-icon { font-size: 1rem; margin-top: 1px; flex-shrink: 0; }
 
   .reason-weight {
     margin-left: auto;
     font-family: var(--mono);
     font-size: 0.75rem;
-    color: var(--accent2);
-    background: rgba(255,60,92,0.08);
-    border: 1px solid rgba(255,60,92,0.2);
     padding: 2px 8px;
     border-radius: 2px;
     white-space: nowrap;
+    flex-shrink: 0;
   }
+
+  .reason-weight.high { color: var(--accent2); background: rgba(255,60,92,0.08); border: 1px solid rgba(255,60,92,0.2); }
+  .reason-weight.med  { color: var(--warn);    background: rgba(255,184,0,0.08);  border: 1px solid rgba(255,184,0,0.2); }
+  .reason-weight.low  { color: var(--safe);    background: rgba(0,230,118,0.08);  border: 1px solid rgba(0,230,118,0.25); }
 
   /* feature scores */
   .features-card {
@@ -561,19 +542,7 @@
     background: linear-gradient(90deg, var(--accent), transparent);
   }
 
-  .features-card .card-head {
-    padding: 16px 28px;
-    border-bottom: 1px solid var(--border);
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    color: var(--muted);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  .feature-rows {
-    padding: 8px 0;
-  }
+  .feature-rows { padding: 8px 0; }
 
   .feature-row {
     display: flex;
@@ -587,9 +556,9 @@
 
   .feature-name {
     font-family: var(--mono);
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--muted);
-    width: 200px;
+    width: 210px;
     flex-shrink: 0;
   }
 
@@ -607,23 +576,22 @@
     transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
   }
 
-  .feature-bar-fill.danger { background: var(--accent2); }
+  .feature-bar-fill.danger  { background: var(--accent2); }
   .feature-bar-fill.warning { background: var(--warn); }
-  .feature-bar-fill.normal { background: var(--safe); }
+  .feature-bar-fill.normal  { background: var(--safe); }
 
   .feature-val {
     font-family: var(--mono);
     font-size: 0.75rem;
-    width: 40px;
+    width: 44px;
     text-align: right;
     flex-shrink: 0;
   }
 
-  .feature-val.danger { color: var(--accent2); }
+  .feature-val.danger  { color: var(--accent2); }
   .feature-val.warning { color: var(--warn); }
-  .feature-val.normal { color: var(--safe); }
+  .feature-val.normal  { color: var(--safe); }
 
-  /* action buttons */
   .result-actions {
     display: flex;
     gap: 12px;
@@ -646,10 +614,7 @@
     transition: border-color 0.2s, color 0.2s;
   }
 
-  .btn-outline:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
 
   .btn-primary {
     flex: 1;
@@ -666,9 +631,7 @@
     transition: box-shadow 0.2s;
   }
 
-  .btn-primary:hover {
-    box-shadow: 0 0 20px rgba(0,229,255,0.3);
-  }
+  .btn-primary:hover { box-shadow: 0 0 20px rgba(0,229,255,0.3); }
 
   .api-note {
     width: 100%;
@@ -685,7 +648,7 @@
 
   .api-note strong { color: var(--accent); }
 
-  /* ══════════════ ABOUT PAGE ══════════════ */
+  /* ══ ABOUT ══ */
   #about {
     min-height: 100vh;
     padding: 120px 24px 80px;
@@ -702,33 +665,13 @@
     margin-bottom: 12px;
   }
 
-  .about-h2 {
-    font-size: 2.2rem;
-    font-weight: 800;
-    margin-bottom: 16px;
-    line-height: 1.1;
-  }
+  .about-h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: 16px; line-height: 1.1; }
 
-  .about-p {
-    color: var(--muted);
-    font-size: 0.95rem;
-    line-height: 1.8;
-    margin-bottom: 40px;
-  }
+  .about-p { color: var(--muted); font-size: 0.95rem; line-height: 1.8; margin-bottom: 40px; }
 
-  .about-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 48px 0;
-  }
+  .about-divider { height: 1px; background: var(--border); margin: 48px 0; }
 
-  /* pipeline */
-  .pipeline {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    margin-bottom: 48px;
-  }
+  .pipeline { display: flex; flex-direction: column; margin-bottom: 48px; }
 
   .pipe-step {
     display: flex;
@@ -736,7 +679,6 @@
     align-items: flex-start;
     padding: 24px 0;
     border-bottom: 1px solid var(--border);
-    position: relative;
   }
 
   .pipe-step:last-child { border-bottom: none; }
@@ -746,30 +688,17 @@
     font-size: 0.7rem;
     color: var(--accent);
     border: 1px solid rgba(0,229,255,0.25);
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
     border-radius: 2px;
     flex-shrink: 0;
     margin-top: 2px;
     background: rgba(0,229,255,0.04);
   }
 
-  .pipe-title {
-    font-weight: 600;
-    font-size: 1rem;
-    margin-bottom: 6px;
-  }
+  .pipe-title { font-weight: 600; font-size: 1rem; margin-bottom: 6px; }
+  .pipe-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
 
-  .pipe-desc {
-    font-size: 0.85rem;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-
-  /* tech stack */
   .tech-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -786,28 +715,10 @@
   }
 
   .tech-item:hover { border-color: var(--accent); }
+  .tech-item-label { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+  .tech-item-val { font-size: 0.9rem; font-weight: 500; color: var(--text); }
 
-  .tech-item-label {
-    font-family: var(--mono);
-    font-size: 0.65rem;
-    color: var(--muted);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-
-  .tech-item-val {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text);
-  }
-
-  /* team */
-  .team-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
+  .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 
   .team-card {
     background: var(--surface);
@@ -835,9 +746,7 @@
     background: linear-gradient(135deg, rgba(0,229,255,0.2), rgba(0,229,255,0.05));
     border: 1px solid rgba(0,229,255,0.2);
     border-radius: 2px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     font-family: var(--mono);
     font-size: 0.9rem;
     color: var(--accent);
@@ -845,25 +754,27 @@
     margin-bottom: 14px;
   }
 
-  .team-name {
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
+  .team-name { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
+  .team-usn { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); }
 
-  .team-usn {
+  .sdg-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+
+  .sdg-badge {
     font-family: var(--mono);
     font-size: 0.68rem;
-    color: var(--muted);
+    padding: 5px 12px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+    background: rgba(0,229,255,0.06);
+    border: 1px solid rgba(0,229,255,0.18);
+    color: var(--accent);
   }
 
-  /* ── ANIMATIONS ── */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(18px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* loading spinner */
   .spinner-overlay {
     display: none;
     position: fixed;
@@ -899,26 +810,6 @@
 
   @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-  /* SDG badges */
-  .sdg-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 12px;
-  }
-
-  .sdg-badge {
-    font-family: var(--mono);
-    font-size: 0.68rem;
-    padding: 5px 12px;
-    border-radius: 2px;
-    letter-spacing: 1px;
-    background: rgba(0,229,255,0.06);
-    border: 1px solid rgba(0,229,255,0.18);
-    color: var(--accent);
-  }
-
-  /* responsive */
   @media (max-width: 640px) {
     nav { padding: 16px 20px; }
     nav ul { gap: 18px; }
@@ -933,7 +824,6 @@
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <div class="logo" onclick="showPage('home')">
     <svg viewBox="0 0 28 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -949,16 +839,14 @@
   </ul>
 </nav>
 
-<!-- SPINNER -->
 <div class="spinner-overlay" id="spinner">
   <div class="spinner"></div>
-  <div class="spinner-text">ANALYZING URL...</div>
+  <div class="spinner-text" id="spinnerText">ANALYZING URL...</div>
 </div>
 
-<!-- ══ HOME PAGE ══ -->
+<!-- ══ HOME ══ -->
 <section class="page active" id="home">
   <div class="hero-badge">ML-POWERED DETECTION SYSTEM</div>
-
   <h1>Detect <span>Phishing</span><br>Before It Strikes</h1>
   <p class="hero-sub">
     PhishShield uses Machine Learning + Explainable AI to analyze URLs in real time — giving you a risk score and clear reasons, not just a binary warning.
@@ -978,53 +866,40 @@
     </div>
     <div class="input-hint">
       <span>Supports HTTP &amp; HTTPS links</span>
-      <span>Email links supported</span>
+      <span>Results powered by ML model</span>
     </div>
+    <div class="error-box" id="errorBox"></div>
   </div>
 
   <div class="stats-row">
-    <div class="stat">
-      <span class="stat-num">97.4%</span>
-      <span class="stat-label">Detection Accuracy</span>
-    </div>
-    <div class="stat">
-      <span class="stat-num">3</span>
-      <span class="stat-label">Feature Categories</span>
-    </div>
-    <div class="stat">
-      <span class="stat-num">XAI</span>
-      <span class="stat-label">Explainable Results</span>
-    </div>
-    <div class="stat">
-      <span class="stat-num">&lt;1s</span>
-      <span class="stat-label">Response Time</span>
-    </div>
+    <div class="stat"><span class="stat-num">17</span><span class="stat-label">URL Features</span></div>
+    <div class="stat"><span class="stat-num">RF</span><span class="stat-label">Random Forest</span></div>
+    <div class="stat"><span class="stat-num">XAI</span><span class="stat-label">Explainable AI</span></div>
+    <div class="stat"><span class="stat-num">&lt;1s</span><span class="stat-label">Response Time</span></div>
   </div>
 
   <div class="features-row">
-    <span class="feat-pill">Lexical Analysis</span>
-    <span class="feat-pill">Host-Based Features</span>
-    <span class="feat-pill">Content Analysis</span>
-    <span class="feat-pill">SHAP Explanations</span>
-    <span class="feat-pill">Risk Scoring</span>
-    <span class="feat-pill">Random Forest</span>
+    <span class="feat-pill">URL Length</span>
+    <span class="feat-pill">Suspicious Keywords</span>
+    <span class="feat-pill">HTTPS Check</span>
+    <span class="feat-pill">TLD Analysis</span>
+    <span class="feat-pill">Domain Structure</span>
+    <span class="feat-pill">Special Chars</span>
   </div>
 </section>
 
-<!-- ══ RESULT PAGE ══ -->
+<!-- ══ RESULT ══ -->
 <section class="page" id="result">
-
   <div class="result-header">
-    <div class="result-url-display" id="resultUrlDisplay">
-      Scanning: <span id="scannedUrl">http://paypal-verify-login.suspicious-domain.tk/secure</span>
+    <div class="result-url-display">
+      Scanning: <span id="scannedUrl"></span>
     </div>
     <div class="result-title">Analysis Complete</div>
   </div>
 
-  <!-- Verdict card (phishing demo) -->
-  <div class="verdict-card phishing" id="verdictCard">
+  <div class="verdict-card" id="verdictCard">
     <div class="verdict-banner">
-      <div class="verdict-icon">⚠️</div>
+      <div class="verdict-icon" id="verdictIcon">⚠️</div>
       <div>
         <div class="verdict-label" id="verdictLabel">PHISHING DETECTED</div>
         <div class="verdict-sub" id="verdictSub">High confidence — do not visit this URL</div>
@@ -1033,120 +908,60 @@
     <div class="verdict-body">
       <div class="risk-section">
         <div class="risk-label-row">
-          <span class="risk-label">Risk Score</span>
+          <span class="risk-label">Confidence Score</span>
           <span class="risk-pct" id="riskPct">82%</span>
         </div>
         <div class="risk-bar-track">
-          <div class="risk-bar-fill" id="riskBarFill" style="width:82%"></div>
+          <div class="risk-bar-fill" id="riskBarFill" style="width:0%"></div>
         </div>
       </div>
       <div class="detail-item">
-        <div class="detail-key">Model Used</div>
-        <div class="detail-val" id="modelUsed">Random Forest</div>
+        <div class="detail-key">Model</div>
+        <div class="detail-val">Random Forest</div>
       </div>
       <div class="detail-item">
-        <div class="detail-key">Confidence</div>
-        <div class="detail-val bad" id="confVal">82.4%</div>
+        <div class="detail-key">Threshold</div>
+        <div class="detail-val">≥ 70% = Phishing</div>
       </div>
       <div class="detail-item">
         <div class="detail-key">URL Length</div>
-        <div class="detail-val warn" id="urlLen">67 chars</div>
+        <div class="detail-val" id="urlLen">—</div>
       </div>
       <div class="detail-item">
         <div class="detail-key">HTTPS</div>
-        <div class="detail-val bad" id="httpsVal">No ✗</div>
+        <div class="detail-val" id="httpsVal">—</div>
       </div>
     </div>
   </div>
 
-  <!-- Reasons -->
-  <div class="reasons-card" id="reasonsCard">
-    <div class="card-head">🧠 Why was this flagged? (XAI — SHAP Analysis)</div>
-    <ul class="reasons-list" id="reasonsList">
-      <li class="reason-item">
-        <span class="reason-icon">🔴</span>
-        <span>Suspicious domain name containing brand impersonation (<code>paypal-verify</code>)</span>
-        <span class="reason-weight">HIGH</span>
-      </li>
-      <li class="reason-item">
-        <span class="reason-icon">🔴</span>
-        <span>TLD <code>.tk</code> is a known free domain frequently used in phishing</span>
-        <span class="reason-weight">HIGH</span>
-      </li>
-      <li class="reason-item">
-        <span class="reason-icon">🟡</span>
-        <span>Unusual URL length (67 characters) with excessive path depth</span>
-        <span class="reason-weight">MED</span>
-      </li>
-      <li class="reason-item">
-        <span class="reason-icon">🟡</span>
-        <span>Missing HTTPS — no valid SSL certificate detected</span>
-        <span class="reason-weight">MED</span>
-      </li>
-      <li class="reason-item">
-        <span class="reason-icon">🟡</span>
-        <span>Multiple special characters (<code>-</code>, <code>/</code>, <code>?</code>, <code>=</code>) in URL structure</span>
-        <span class="reason-weight">MED</span>
-      </li>
-    </ul>
+  <div class="reasons-card">
+    <div class="card-head">🧠 Why was this flagged? — Feature Analysis</div>
+    <ul class="reasons-list" id="reasonsList"></ul>
   </div>
 
-  <!-- Feature scores -->
   <div class="features-card">
-    <div class="card-head">📊 Feature Importance Scores</div>
-    <div class="feature-rows" id="featureRows">
-      <div class="feature-row">
-        <span class="feature-name">domain_suspicion</span>
-        <div class="feature-bar-track"><div class="feature-bar-fill danger" style="width:94%"></div></div>
-        <span class="feature-val danger">0.94</span>
-      </div>
-      <div class="feature-row">
-        <span class="feature-name">tld_risk</span>
-        <div class="feature-bar-track"><div class="feature-bar-fill danger" style="width:88%"></div></div>
-        <span class="feature-val danger">0.88</span>
-      </div>
-      <div class="feature-row">
-        <span class="feature-name">special_char_count</span>
-        <div class="feature-bar-track"><div class="feature-bar-fill warning" style="width:71%"></div></div>
-        <span class="feature-val warning">0.71</span>
-      </div>
-      <div class="feature-row">
-        <span class="feature-name">url_length</span>
-        <div class="feature-bar-track"><div class="feature-bar-fill warning" style="width:60%"></div></div>
-        <span class="feature-val warning">0.60</span>
-      </div>
-      <div class="feature-row">
-        <span class="feature-name">https_status</span>
-        <div class="feature-bar-track"><div class="feature-bar-fill warning" style="width:55%"></div></div>
-        <span class="feature-val warning">0.55</span>
-      </div>
-      <div class="feature-row">
-        <span class="feature-name">domain_age</span>
-        <div class="feature-bar-track"><div class="feature-bar-fill normal" style="width:28%"></div></div>
-        <span class="feature-val normal">0.28</span>
-      </div>
-    </div>
+    <div class="card-head">📊 Extracted URL Features (from your ML model)</div>
+    <div class="feature-rows" id="featureRows"></div>
   </div>
 
-  <!-- Actions -->
   <div class="result-actions">
     <button class="btn-outline" onclick="showPage('home')">← Check Another URL</button>
-    <button class="btn-primary" id="safeBtn" onclick="demoSafe()">▶ Demo Safe URL</button>
+    <button class="btn-primary" onclick="showPage('about')">ℹ How It Works</button>
   </div>
 
   <div class="api-note">
-    <strong>Dev Note:</strong> Frontend is ready to integrate with ML model via Flask/Django REST API — replace dummy data with <code>POST /api/analyze</code> response.
+    <strong>Connected:</strong> Results are from your trained ML model via
+    <code>POST http://127.0.0.1:5000/predict</code>
   </div>
 </section>
 
-<!-- ══ ABOUT PAGE ══ -->
+<!-- ══ ABOUT ══ -->
 <section class="page" id="about">
   <div class="about-section-tag">// ABOUT THE PROJECT</div>
   <h2 class="about-h2">PhishShield</h2>
   <p class="about-p">
-    PhishShield is a Machine Learning-based phishing detection and prevention system developed as a Major Project at BMS Institute of Technology and Management, Bengaluru. It combines advanced feature extraction, supervised ML models, and Explainable AI (XAI) to identify malicious URLs and email content in real time — while giving users clear, understandable reasons behind every decision.
+    PhishShield is a Machine Learning-based phishing detection and prevention system developed as a Major Project at BMS Institute of Technology and Management, Bengaluru. It combines advanced feature extraction, supervised ML models, and Explainable AI (XAI) to identify malicious URLs in real time — giving users clear, understandable reasons behind every decision.
   </p>
-
   <div class="sdg-row">
     <span class="sdg-badge">SDG 9 — Industry & Innovation</span>
     <span class="sdg-badge">SDG 16 — Peace & Justice</span>
@@ -1157,95 +972,29 @@
 
   <div class="about-section-tag">// HOW IT WORKS</div>
   <div class="pipeline">
-    <div class="pipe-step">
-      <div class="pipe-num">01</div>
-      <div>
-        <div class="pipe-title">Data Collection &amp; Preprocessing</div>
-        <div class="pipe-desc">URLs and email samples collected from PhishTank, OpenPhish, and Kaggle. Data cleaned, normalized, and balanced using resampling techniques to handle class imbalance.</div>
-      </div>
-    </div>
-    <div class="pipe-step">
-      <div class="pipe-num">02</div>
-      <div>
-        <div class="pipe-title">Feature Extraction</div>
-        <div class="pipe-desc">Three feature categories extracted — Lexical (URL length, special chars, keywords), Host-based (domain age, DNS, SSL), and Content-based (text patterns, hyperlink analysis).</div>
-      </div>
-    </div>
-    <div class="pipe-step">
-      <div class="pipe-num">03</div>
-      <div>
-        <div class="pipe-title">ML Classification</div>
-        <div class="pipe-desc">Multiple algorithms trained and evaluated — Random Forest, SVM, Gradient Boosting. Best model selected based on Accuracy, Precision, Recall, and F1-Score metrics.</div>
-      </div>
-    </div>
-    <div class="pipe-step">
-      <div class="pipe-num">04</div>
-      <div>
-        <div class="pipe-title">Risk Score Computation</div>
-        <div class="pipe-desc">Classification probabilities converted to a 3-tier threat level. Low risk → Safe. Medium → Warning. High → Blocked/Flagged as phishing.</div>
-      </div>
-    </div>
-    <div class="pipe-step">
-      <div class="pipe-num">05</div>
-      <div>
-        <div class="pipe-title">Explainable AI (XAI)</div>
-        <div class="pipe-desc">SHAP (Shapley Additive Explanations) applied to generate reason-based alerts — clearly showing which URL features contributed most to the phishing verdict.</div>
-      </div>
-    </div>
-    <div class="pipe-step">
-      <div class="pipe-num">06</div>
-      <div>
-        <div class="pipe-title">Real-Time Alerts &amp; Logging</div>
-        <div class="pipe-desc">Results displayed instantly with prevention recommendations. All scans logged for monitoring, analysis, and model improvement over time.</div>
-      </div>
-    </div>
+    <div class="pipe-step"><div class="pipe-num">01</div><div><div class="pipe-title">Data Collection &amp; Preprocessing</div><div class="pipe-desc">URLs collected from PhishTank, OpenPhish, and Kaggle. Cleaned, normalized, and balanced using resampling techniques.</div></div></div>
+    <div class="pipe-step"><div class="pipe-num">02</div><div><div class="pipe-title">Feature Extraction (17 Features)</div><div class="pipe-desc">URL length, dot/dash/slash counts, HTTPS status, @ symbol, digit count, suspicious keywords, risky TLDs, subdomain depth, domain digit presence, long URL flag.</div></div></div>
+    <div class="pipe-step"><div class="pipe-num">03</div><div><div class="pipe-title">ML Classification — Random Forest</div><div class="pipe-desc">Model trained and saved as <code>url_model.pkl</code>. Loaded via joblib at runtime. Threshold set at 0.7 for phishing classification.</div></div></div>
+    <div class="pipe-step"><div class="pipe-num">04</div><div><div class="pipe-title">Risk Score Computation</div><div class="pipe-desc">predict_proba() output converted to percentage. Below 70% → Safe. Above 70% → Phishing.</div></div></div>
+    <div class="pipe-step"><div class="pipe-num">05</div><div><div class="pipe-title">Explainable Alerts</div><div class="pipe-desc">Feature values analyzed per URL and mapped to human-readable reasons shown in the Result page.</div></div></div>
+    <div class="pipe-step"><div class="pipe-num">06</div><div><div class="pipe-title">Flask REST API</div><div class="pipe-desc">Frontend sends POST to <code>/predict</code> with the URL. Backend responds with <code>is_phishing</code> and <code>confidence</code> values.</div></div></div>
   </div>
 
   <div class="about-section-tag">// TECH STACK</div>
   <div class="tech-grid">
-    <div class="tech-item">
-      <div class="tech-item-label">Language</div>
-      <div class="tech-item-val">Python 3.x</div>
-    </div>
-    <div class="tech-item">
-      <div class="tech-item-label">ML Libraries</div>
-      <div class="tech-item-val">Scikit-learn, TensorFlow</div>
-    </div>
-    <div class="tech-item">
-      <div class="tech-item-label">XAI</div>
-      <div class="tech-item-val">SHAP, Feature Importance</div>
-    </div>
-    <div class="tech-item">
-      <div class="tech-item-label">Web Framework</div>
-      <div class="tech-item-val">Flask / Django</div>
-    </div>
-    <div class="tech-item">
-      <div class="tech-item-label">Database</div>
-      <div class="tech-item-val">MySQL / MongoDB</div>
-    </div>
-    <div class="tech-item">
-      <div class="tech-item-label">Data Sources</div>
-      <div class="tech-item-val">PhishTank, OpenPhish</div>
-    </div>
+    <div class="tech-item"><div class="tech-item-label">Language</div><div class="tech-item-val">Python 3.x</div></div>
+    <div class="tech-item"><div class="tech-item-label">ML Library</div><div class="tech-item-val">Scikit-learn</div></div>
+    <div class="tech-item"><div class="tech-item-label">Model</div><div class="tech-item-val">Random Forest</div></div>
+    <div class="tech-item"><div class="tech-item-label">Web Framework</div><div class="tech-item-val">Flask + CORS</div></div>
+    <div class="tech-item"><div class="tech-item-label">Model Storage</div><div class="tech-item-val">joblib (.pkl)</div></div>
+    <div class="tech-item"><div class="tech-item-label">Data Sources</div><div class="tech-item-val">PhishTank, Kaggle</div></div>
   </div>
 
   <div class="about-section-tag">// TEAM — BATCH 3</div>
   <div class="team-grid">
-    <div class="team-card">
-      <div class="team-avatar">DK</div>
-      <div class="team-name">D Nanditha Kale</div>
-      <div class="team-usn">1BY23CB012</div>
-    </div>
-    <div class="team-card">
-      <div class="team-avatar">SK</div>
-      <div class="team-name">Sneha Kumari</div>
-      <div class="team-usn">1BY23CB065</div>
-    </div>
-    <div class="team-card">
-      <div class="team-avatar">PM</div>
-      <div class="team-name">Priyanka S M</div>
-      <div class="team-usn">1BY24CB402</div>
-    </div>
+    <div class="team-card"><div class="team-avatar">DK</div><div class="team-name">D Nanditha Kale</div><div class="team-usn">1BY23CB012</div></div>
+    <div class="team-card"><div class="team-avatar">SK</div><div class="team-name">Sneha Kumari</div><div class="team-usn">1BY23CB065</div></div>
+    <div class="team-card"><div class="team-avatar">PM</div><div class="team-name">Priyanka S M</div><div class="team-usn">1BY24CB402</div></div>
   </div>
 
   <div class="about-divider"></div>
@@ -1255,7 +1004,7 @@
 </section>
 
 <script>
-  // Page navigation
+  // ── Page navigation ──
   function showPage(name) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('nav ul li a').forEach(a => a.classList.remove('active'));
@@ -1264,126 +1013,256 @@
     window.scrollTo(0, 0);
   }
 
-  // Sample phishing URLs for demo
-  const phishingUrls = [
-    "http://paypal-verify-login.suspicious-domain.tk/secure",
-    "https://arnazon-account-update.free.fr/login?token=abc123xyz",
-    "http://secure-banking-alert.xyz/verify/credentials?redirect=1"
-  ];
+  // ── Feature extractor (mirrors your shared/feature_extractor.py exactly) ──
+  function extractFeatures(url) {
+    const lower = url.toLowerCase();
+    const suspiciousWords = ["login","secure","verify","account","bank","update","free","bonus","paypal","signin","confirm","security","alert"];
+    const suspiciousTlds  = [".xyz",".tk",".ml",".ga",".cf",".gq",".top",".biz",".info"];
 
-  const safeUrls = [
-    "https://www.google.com",
-    "https://github.com/user/repository",
-    "https://stackoverflow.com/questions/12345"
-  ];
+    let domain = '';
+    try { domain = new URL(lower).hostname; } catch(e) { domain = lower.split('/')[0]; }
 
-  let isSafeDemo = false;
+    const digitCount = (lower.match(/\d/g) || []).length;
+    const hasSuspWord = suspiciousWords.some(w => lower.includes(w));
+    const suspWordCount = suspiciousWords.filter(w => lower.includes(w)).length;
+    const hasSuspTld = suspiciousTlds.some(t => lower.includes(t));
+    const domainDots = (domain.match(/\./g) || []).length;
 
- async function checkURL() {
-  const input = document.getElementById('urlInput').value.trim();
-
-  if (!input) {
-    alert("Enter a URL");
-    return;
+    return {
+      url_length:          lower.length,
+      dot_count:           (lower.match(/\./g) || []).length,
+      dash_count:          (lower.match(/-/g) || []).length,
+      slash_count:         (lower.match(/\//g) || []).length,
+      equals_count:        (lower.match(/=/g) || []).length,
+      has_https:           lower.startsWith("https") ? 1 : 0,
+      has_http_only:       (lower.startsWith("http") && !lower.startsWith("https")) ? 1 : 0,
+      has_at_symbol:       lower.includes('@') ? 1 : 0,
+      digit_count:         digitCount,
+      has_suspicious_word: hasSuspWord ? 1 : 0,
+      suspicious_word_count: suspWordCount,
+      has_suspicious_tld:  hasSuspTld ? 1 : 0,
+      deep_subdomain:      domainDots > 2 ? 1 : 0,
+      has_dash_in_domain:  domain.includes('-') ? 1 : 0,
+      domain_has_digits:   /\d/.test(domain) ? 1 : 0,
+      domain_length:       domain.length,
+      is_long_url:         lower.length > 60 ? 1 : 0,
+    };
   }
 
-  document.getElementById('spinner').classList.add('show');
-
-  try {
-    const response = await fetch("http://127.0.0.1:5000/predict", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ url: input })
-    });
-
-    const data = await response.json();
-
-    document.getElementById('spinner').classList.remove('show');
-
-    const isPhishing = data.is_phishing;
-    const score = Math.floor(data.confidence * 100);
-
-    showResult(input, isPhishing, score);
-
-  } catch (error) {
-    document.getElementById('spinner').classList.remove('show');
-    alert("Backend not running or error occurred");
-    console.error(error);
-  }
-}
-
-
-  function demoSafe() {
-    isSafeDemo = !isSafeDemo;
-    const url = isSafeDemo ? safeUrls[Math.floor(Math.random()*safeUrls.length)] : phishingUrls[Math.floor(Math.random()*phishingUrls.length)];
-    document.getElementById('spinner').classList.add('show');
-    setTimeout(() => {
-      document.getElementById('spinner').classList.remove('show');
-      showResult(url, !isSafeDemo, isSafeDemo ? Math.floor(5+Math.random()*18) : Math.floor(72+Math.random()*22));
-      document.getElementById('safeBtn').textContent = isSafeDemo ? '▶ Demo Phishing URL' : '▶ Demo Safe URL';
-    }, 1400);
-  }
-
-  function showResult(url, isPhishing, score) {
-    document.getElementById('scannedUrl').textContent = url;
-
-    const card = document.getElementById('verdictCard');
-    const label = document.getElementById('verdictLabel');
-    const sub = document.getElementById('verdictSub');
-    const pct = document.getElementById('riskPct');
-    const fill = document.getElementById('riskBarFill');
-    const confVal = document.getElementById('confVal');
-    const urlLen = document.getElementById('urlLen');
-    const httpsVal = document.getElementById('httpsVal');
-    const reasonsList = document.getElementById('reasonsList');
-    const safeBtn = document.getElementById('safeBtn');
-
-    pct.textContent = score + '%';
-    confVal.textContent = score + '.0%';
-    urlLen.textContent = url.length + ' chars';
+  // ── Build human-readable reasons from features ──
+  function buildReasons(features, url, isPhishing) {
+    const reasons = [];
 
     if (isPhishing) {
-      card.className = 'verdict-card phishing';
-      label.textContent = 'PHISHING DETECTED';
-      label.style.color = 'var(--accent2)';
-      sub.textContent = 'High confidence — do not visit this URL';
-      pct.style.color = 'var(--accent2)';
-      fill.className = 'risk-bar-fill';
-      fill.style.width = score + '%';
-      confVal.className = 'detail-val bad';
-      urlLen.className = 'detail-val warn';
-      httpsVal.textContent = url.startsWith('https') ? 'Yes ✓' : 'No ✗';
-      httpsVal.className = url.startsWith('https') ? 'detail-val ok' : 'detail-val bad';
-      reasonsList.innerHTML = `
-        <li class="reason-item"><span class="reason-icon">🔴</span><span>Suspicious domain structure with keyword stuffing or brand impersonation</span><span class="reason-weight">HIGH</span></li>
-        <li class="reason-item"><span class="reason-icon">🔴</span><span>High-risk or free TLD commonly associated with phishing campaigns</span><span class="reason-weight">HIGH</span></li>
-        <li class="reason-item"><span class="reason-icon">🟡</span><span>URL length of <strong>${url.length} chars</strong> exceeds typical legitimate URL threshold</span><span class="reason-weight">MED</span></li>
-        <li class="reason-item"><span class="reason-icon">🟡</span><span>Multiple special characters and excessive path depth detected</span><span class="reason-weight">MED</span></li>
-        <li class="reason-item"><span class="reason-icon">🟡</span><span>${url.startsWith('https') ? 'HTTPS present but certificate not verified' : 'No HTTPS — missing SSL encryption'}</span><span class="reason-weight">MED</span></li>
-      `;
+      if (features.has_suspicious_word) {
+        const words = ["login","secure","verify","account","bank","update","free","bonus","paypal","signin","confirm","security","alert"];
+        const found = words.filter(w => url.toLowerCase().includes(w));
+        reasons.push({ icon:'🔴', text: `Suspicious keyword(s) detected in URL: <code>${found.join(', ')}</code>`, weight:'high' });
+      }
+      if (features.has_suspicious_tld) {
+        const tlds = [".xyz",".tk",".ml",".ga",".cf",".gq",".top",".biz",".info"];
+        const found = tlds.filter(t => url.toLowerCase().includes(t));
+        reasons.push({ icon:'🔴', text: `High-risk free TLD detected: <code>${found.join(', ')}</code> — commonly used in phishing`, weight:'high' });
+      }
+      if (features.has_dash_in_domain)  reasons.push({ icon:'🟡', text: 'Hyphen in domain name — often used to mimic legitimate brands (e.g. paypal-login.com)', weight:'med' });
+      if (features.is_long_url)          reasons.push({ icon:'🟡', text: `URL length is ${features.url_length} characters — unusually long URLs are a common phishing indicator`, weight:'med' });
+      if (features.has_http_only)        reasons.push({ icon:'🟡', text: 'No HTTPS — connection is not encrypted, typical of malicious pages', weight:'med' });
+      if (features.has_at_symbol)        reasons.push({ icon:'🔴', text: 'Contains @ symbol — used to trick browsers into ignoring the real domain', weight:'high' });
+      if (features.deep_subdomain)       reasons.push({ icon:'🟡', text: 'Deep subdomain structure detected — phishing sites hide behind multiple subdomains', weight:'med' });
+      if (features.domain_has_digits)    reasons.push({ icon:'🟡', text: 'Domain contains digits — legitimate brands rarely use numbers in their domain name', weight:'med' });
+      if (features.suspicious_word_count > 1) reasons.push({ icon:'🔴', text: `Multiple suspicious keywords (${features.suspicious_word_count}) found — high probability of social engineering attempt`, weight:'high' });
     } else {
-      card.className = 'verdict-card safe';
-      label.textContent = 'SAFE URL ✓';
-      label.style.color = 'var(--safe)';
-      sub.textContent = 'Low risk — this URL appears legitimate';
-      pct.style.color = 'var(--safe)';
-      fill.className = 'risk-bar-fill safe-fill';
-      fill.style.width = score + '%';
-      confVal.className = 'detail-val ok';
-      confVal.textContent = (100 - score) + '% safe';
-      urlLen.className = 'detail-val ok';
-      httpsVal.textContent = 'Yes ✓';
-      httpsVal.className = 'detail-val ok';
-      reasonsList.innerHTML = `
-        <li class="reason-item"><span class="reason-icon">🟢</span><span>Domain matches known legitimate website — no impersonation detected</span><span class="reason-weight" style="color:var(--safe);background:rgba(0,230,118,0.08);border-color:rgba(0,230,118,0.25)">LOW</span></li>
-        <li class="reason-item"><span class="reason-icon">🟢</span><span>Valid HTTPS with SSL certificate detected</span><span class="reason-weight" style="color:var(--safe);background:rgba(0,230,118,0.08);border-color:rgba(0,230,118,0.25)">LOW</span></li>
-        <li class="reason-item"><span class="reason-icon">🟢</span><span>URL structure is clean — no excessive special characters or suspicious paths</span><span class="reason-weight" style="color:var(--safe);background:rgba(0,230,118,0.08);border-color:rgba(0,230,118,0.25)">LOW</span></li>
-      `;
+      reasons.push({ icon:'🟢', text: 'No suspicious keywords detected in URL structure', weight:'low' });
+      if (features.has_https) reasons.push({ icon:'🟢', text: 'HTTPS present — connection appears encrypted and secure', weight:'low' });
+      if (!features.has_suspicious_tld) reasons.push({ icon:'🟢', text: 'TLD appears legitimate — not associated with known free/risky domains', weight:'low' });
+      if (!features.is_long_url) reasons.push({ icon:'🟢', text: `URL length is ${features.url_length} characters — within normal range`, weight:'low' });
     }
 
+    if (reasons.length === 0) {
+      reasons.push({ icon: isPhishing ? '🔴' : '🟢', text: isPhishing ? 'ML model flagged this URL based on combined feature pattern analysis' : 'URL passed all feature checks — classified as legitimate', weight: isPhishing ? 'high' : 'low' });
+    }
+
+    return reasons;
+  }
+
+  // ── Build feature bar rows ──
+  function buildFeatureBars(features) {
+    // Max normalisation values for bar display
+    const maxVals = {
+      url_length: 150, dot_count: 8, dash_count: 6, slash_count: 10,
+      equals_count: 5, digit_count: 20, suspicious_word_count: 5,
+      domain_length: 50
+    };
+
+    const rows = [
+      { name: 'url_length',           label: 'url_length',            val: features.url_length,           max: maxVals.url_length },
+      { name: 'has_https',            label: 'has_https',             val: features.has_https,             max: 1 },
+      { name: 'has_http_only',        label: 'has_http_only',         val: features.has_http_only,         max: 1 },
+      { name: 'has_suspicious_word',  label: 'has_suspicious_word',   val: features.has_suspicious_word,   max: 1 },
+      { name: 'suspicious_word_count',label: 'suspicious_word_count', val: features.suspicious_word_count, max: maxVals.suspicious_word_count },
+      { name: 'has_suspicious_tld',   label: 'has_suspicious_tld',    val: features.has_suspicious_tld,    max: 1 },
+      { name: 'has_dash_in_domain',   label: 'has_dash_in_domain',    val: features.has_dash_in_domain,    max: 1 },
+      { name: 'deep_subdomain',       label: 'deep_subdomain',        val: features.deep_subdomain,        max: 1 },
+      { name: 'is_long_url',          label: 'is_long_url',           val: features.is_long_url,           max: 1 },
+      { name: 'has_at_symbol',        label: 'has_at_symbol',         val: features.has_at_symbol,         max: 1 },
+      { name: 'domain_has_digits',    label: 'domain_has_digits',     val: features.domain_has_digits,     max: 1 },
+      { name: 'digit_count',          label: 'digit_count',           val: features.digit_count,           max: maxVals.digit_count },
+      { name: 'dash_count',           label: 'dash_count',            val: features.dash_count,            max: maxVals.dash_count },
+      { name: 'dot_count',            label: 'dot_count',             val: features.dot_count,             max: maxVals.dot_count },
+      { name: 'slash_count',          label: 'slash_count',           val: features.slash_count,           max: maxVals.slash_count },
+      { name: 'domain_length',        label: 'domain_length',         val: features.domain_length,         max: maxVals.domain_length },
+      { name: 'equals_count',         label: 'equals_count',          val: features.equals_count,          max: maxVals.equals_count },
+    ];
+
+    // Risky features get red bars
+    const dangerFeatures = ['has_suspicious_word','has_suspicious_tld','has_http_only','has_at_symbol','deep_subdomain','has_dash_in_domain','domain_has_digits','is_long_url','suspicious_word_count'];
+    const warnFeatures   = ['url_length','dash_count','digit_count','equals_count','dot_count'];
+
+    return rows.map(r => {
+      const pct = Math.min(100, Math.round((r.val / r.max) * 100));
+      const isDanger = dangerFeatures.includes(r.name) && r.val > 0;
+      const isWarn   = warnFeatures.includes(r.name) && pct > 40;
+      const cls = isDanger ? 'danger' : isWarn ? 'warning' : 'normal';
+      const displayVal = r.max === 1 ? (r.val ? 'YES' : 'NO') : r.val;
+      return `
+        <div class="feature-row">
+          <span class="feature-name">${r.label}</span>
+          <div class="feature-bar-track">
+            <div class="feature-bar-fill ${cls}" style="width:${pct}%"></div>
+          </div>
+          <span class="feature-val ${cls}">${displayVal}</span>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Main checkURL — calls real Flask backend ──
+  async function checkURL() {
+    const input = document.getElementById('urlInput').value.trim();
+    const errorBox = document.getElementById('errorBox');
+
+    errorBox.classList.remove('show');
+
+    if (!input) {
+      errorBox.textContent = '⚠ Please enter a URL to scan.';
+      errorBox.classList.add('show');
+      return;
+    }
+
+    if (!input.startsWith('http://') && !input.startsWith('https://')) {
+      errorBox.textContent = '⚠ URL must start with http:// or https://';
+      errorBox.classList.add('show');
+      return;
+    }
+
+    document.getElementById('spinner').classList.add('show');
+    document.getElementById('spinnerText').textContent = 'ANALYZING URL...';
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: input })
+      });
+
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+
+      const data = await response.json();
+      document.getElementById('spinner').classList.remove('show');
+
+      const isPhishing = data.is_phishing;
+      const confidence = data.confidence;         // 0.0 – 1.0 from backend
+      const score = Math.round(confidence * 100); // convert to %
+
+      renderResult(input, isPhishing, score, confidence);
+
+    } catch (error) {
+      document.getElementById('spinner').classList.remove('show');
+      errorBox.textContent = '⚠ Cannot connect to backend. Make sure Flask is running: python run.py';
+      errorBox.classList.add('show');
+      console.error('Backend error:', error);
+    }
+  }
+
+  // ── Render result page with real data ──
+  function renderResult(url, isPhishing, score, confidence) {
+    // Extract features client-side (mirrors feature_extractor.py) for display
+    const features = extractFeatures(url);
+
+    // ── Scanned URL display ──
+    document.getElementById('scannedUrl').textContent = url;
+
+    // ── URL detail fields ──
+    const urlLenEl  = document.getElementById('urlLen');
+    const httpsEl   = document.getElementById('httpsVal');
+    urlLenEl.textContent  = url.length + ' chars';
+    urlLenEl.className    = 'detail-val ' + (url.length > 60 ? 'warn' : 'ok');
+    httpsEl.textContent   = features.has_https ? 'Yes ✓' : 'No ✗';
+    httpsEl.className     = 'detail-val ' + (features.has_https ? 'ok' : 'bad');
+
+    // ── Verdict card ──
+    const card   = document.getElementById('verdictCard');
+    const icon   = document.getElementById('verdictIcon');
+    const label  = document.getElementById('verdictLabel');
+    const sub    = document.getElementById('verdictSub');
+    const pct    = document.getElementById('riskPct');
+    const fill   = document.getElementById('riskBarFill');
+
+    // Determine risk tier
+    let tier, cardClass, fillClass;
+    if (isPhishing && score >= 85) {
+      tier = 'HIGH RISK'; cardClass = 'phishing'; fillClass = 'phishing-fill';
+    } else if (isPhishing) {
+      tier = 'MEDIUM RISK'; cardClass = 'warning'; fillClass = 'warning-fill';
+    } else {
+      tier = 'LOW RISK'; cardClass = 'safe'; fillClass = 'safe-fill';
+    }
+
+    card.className  = 'verdict-card ' + cardClass;
+    pct.style.color = cardClass === 'phishing' ? 'var(--accent2)' : cardClass === 'warning' ? 'var(--warn)' : 'var(--safe)';
+
+    if (isPhishing) {
+      icon.textContent  = score >= 85 ? '🚨' : '⚠️';
+      label.textContent = score >= 85 ? 'PHISHING DETECTED' : 'SUSPICIOUS URL';
+      sub.textContent   = score >= 85
+        ? 'High confidence — do not visit this URL'
+        : 'Moderate risk — proceed with extreme caution';
+    } else {
+      icon.textContent  = '✅';
+      label.textContent = 'SAFE URL';
+      sub.textContent   = 'Low risk — this URL appears legitimate';
+    }
+
+    pct.textContent = score + '%';
+
+    // Animate bar after small delay
+    setTimeout(() => {
+      fill.className    = 'risk-bar-fill ' + fillClass;
+      fill.style.width  = score + '%';
+    }, 100);
+
+    // ── Reasons list ──
+    const reasons = buildReasons(features, url, isPhishing);
+    document.getElementById('reasonsList').innerHTML = reasons.map(r =>
+      `<li class="reason-item">
+        <span class="reason-icon">${r.icon}</span>
+        <span>${r.text}</span>
+        <span class="reason-weight ${r.weight}">${r.weight.toUpperCase()}</span>
+      </li>`
+    ).join('');
+
+    // ── Feature bars ──
+    document.getElementById('featureRows').innerHTML = buildFeatureBars(features);
+
     showPage('result');
+  }
+
+  // Page navigation
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('nav ul li a').forEach(a => a.classList.remove('active'));
+    document.getElementById(name).classList.add('active');
+    document.getElementById('nav-' + name).classList.add('active');
+    window.scrollTo(0, 0);
   }
 </script>
 </body>
