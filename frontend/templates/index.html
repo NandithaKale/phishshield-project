@@ -826,9 +826,13 @@
 </style>
 </head>
 <body>
+<<<<<<< HEAD
 <li><a href="#" onclick="showPage('home'); return false;" id="nav-home">Home</a></li>
 <li><a href="#" onclick="showPage('result'); return false;" id="nav-result">Result</a></li>
 <li><a href="#" onclick="showPage('about'); return false;" id="nav-about">About</a></li>
+=======
+
+>>>>>>> 5a237d0c34a9f34c3d08c36b082b5b7933b0a576
 <nav>
   <div class="logo" onclick="showPage('home')">
     <svg viewBox="0 0 28 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1269,6 +1273,17 @@
     showPage('result');
   }
 
+<<<<<<< HEAD
+=======
+  // Page navigation
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('nav ul li a').forEach(a => a.classList.remove('active'));
+    document.getElementById(name).classList.add('active');
+    document.getElementById('nav-' + name).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+>>>>>>> 5a237d0c34a9f34c3d08c36b082b5b7933b0a576
 </script>
 </body>
 </html>
