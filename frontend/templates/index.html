@@ -1438,15 +1438,31 @@
 
   <!-- Actions -->
   <div class="result-actions">
-    <button class="btn-outline" onclick="showPage('home')">← Check Another URL</button>
-    <button class="btn-primary" id="safeBtn" onclick="demoSafe()">▶ Demo Safe URL</button>
-  </div>
+  <button class="btn-outline" onclick="loadHistory()">📜 View History</button>
+  <button class="btn-outline" onclick="resetAndGoHome()">← Check Another URL</button>
+  <button class="btn-primary" id="safeBtn" onclick="demoSafe()">▶ Demo Safe URL</button>
+</div>
 
   <div class="api-note">
     <strong>Dev Note:</strong> Frontend is ready to integrate with ML model via Flask/Django REST API — replace dummy data with <code>POST /api/analyze</code> response.
   </div>
 </section>
+<section class="page" id="history">
+  <div style="padding:120px 24px; max-width:800px; margin:auto;">
+    
+    <h2 style="margin-bottom:20px;">📜 Scan History</h2>
 
+    <div id="historyContainer">
+      Loading...
+    </div>
+
+    <br>
+    <button class="btn-outline" onclick="showPage('home')">
+      ← Back to Home
+    </button>
+
+  </div>
+</section>
 <!-- ══ ABOUT PAGE ══ -->
 
 <section class="page" id="about">
@@ -1593,6 +1609,7 @@
 </section>
 
 <script>
+<<<<<<< HEAD
 
   // ── Page navigation ──
   function showPage(name) {
@@ -1846,6 +1863,57 @@
     showPage('result');
   }
 
+=======
+async function loadHistory() {
+  showPage('history');
+
+  const container = document.getElementById('historyContainer');
+  container.innerHTML = "Loading...";
+
+  try {
+    const response = await fetch("http://127.0.0.1:5000/history");
+    const data = await response.json();
+
+    if (data.length === 0) {
+      container.innerHTML = "No history found.";
+      return;
+    }
+
+    let html = "";
+
+    data.reverse().forEach(item => {
+  html += `
+    <div style="border:1px solid #1e2d45; padding:12px; margin-bottom:10px;">
+      <strong>${item.url}</strong><br>
+      Result: ${item.is_phishing ? "Phishing ❌" : "Safe ✅"} <br>
+      Confidence: ${(item.confidence * 100).toFixed(2)}% <br>
+      <small>${item.timestamp}</small>
+    </div>
+  `;
+});
+
+    container.innerHTML = html;
+
+  } catch (error) {
+    container.innerHTML = "Error loading history";
+    console.error(error);
+  }
+}
+  function resetAndGoHome() {
+  // clear input
+  document.getElementById('urlInput').value = "";
+
+  // reset result UI properly
+  document.getElementById('scannedUrl').textContent = "";
+  document.getElementById('riskPct').textContent = "0%";
+  document.getElementById('confVal').textContent = "";
+  document.getElementById('verdictLabel').textContent = "";
+  document.getElementById('verdictSub').textContent = "";
+
+  // go back
+  showPage('home');
+}
+>>>>>>> 5eb0173 (Integrated history feature with backend DB and frontend UI fixes)
   // Page navigation
   function showPage(name) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1907,16 +1975,35 @@
 }
 
 
-  function demoSafe() {
-    isSafeDemo = !isSafeDemo;
-    const url = isSafeDemo ? safeUrls[Math.floor(Math.random()*safeUrls.length)] : phishingUrls[Math.floor(Math.random()*phishingUrls.length)];
-    document.getElementById('spinner').classList.add('show');
-    setTimeout(() => {
-      document.getElementById('spinner').classList.remove('show');
-      showResult(url, !isSafeDemo, isSafeDemo ? Math.floor(5+Math.random()*18) : Math.floor(72+Math.random()*22));
-      document.getElementById('safeBtn').textContent = isSafeDemo ? '▶ Demo Phishing URL' : '▶ Demo Safe URL';
-    }, 1400);
+  async function demoSafe() {
+  const randomUrl = safeUrls[Math.floor(Math.random() * safeUrls.length)];
+
+  document.getElementById('spinner').classList.add('show');
+
+  try {
+    const response = await fetch("http://127.0.0.1:5000/predict", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ url: randomUrl })
+    });
+
+    const data = await response.json();
+
+    document.getElementById('spinner').classList.remove('show');
+
+    const isPhishing = data.is_phishing;
+    const score = Math.floor(data.confidence * 100);
+
+    showResult(randomUrl, isPhishing, score);
+
+  } catch (error) {
+    document.getElementById('spinner').classList.remove('show');
+    alert("Backend error");
+    console.error(error);
   }
+}
 
   function showResult(url, isPhishing, score) {
     document.getElementById('scannedUrl').textContent = url;
