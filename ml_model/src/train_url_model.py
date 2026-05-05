@@ -51,16 +51,12 @@ y = data['Label']
 for url in data['URL']:
     X.append(extract_features(str(url)))
 
-# =========================
-# SPLIT
-# =========================
+
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, stratify=y, random_state=42
 )
 
-# =========================
-# MODEL
-# =========================
+
 model = RandomForestClassifier(
     n_estimators=500,
     max_depth=25,
