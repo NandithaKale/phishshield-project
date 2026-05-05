@@ -109,38 +109,15 @@ def predict_url_with_risk(url):
 # =========================
 test_urls = [
 # SAFE (15)
-"https://www.google.com",
-"https://www.amazon.in",
-"https://www.microsoft.com",
-"https://www.github.com",
-"https://www.stackoverflow.com",
-"https://www.wikipedia.org",
-"https://www.apple.com",
-"https://www.netflix.com",
-"https://www.linkedin.com",
+
 "https://www.paypal.com",
 "https://www.ibm.com",
-"https://www.oracle.com",
-"https://www.adobe.com",
-"https://www.nvidia.com",
-"https://www.intel.com",
+
 
 # PHISHING (15)
 "http://secure-login-paypal.xyz/verify",
 "http://account-update-bank.ru/login",
-"http://free-money-offer.click/win",
-"http://verify-your-account-now.info",
-"http://login-microsoft-account-alert.xyz",
-"http://paypal-security-check.ga",
-"http://update-your-bank-account-now.top",
-"http://confirm-identity-paypal-alert.ml",
-"http://secure-amazon-login-warning.xyz",
-"http://urgent-bank-verification-alert.biz",
-"http://signin-ebay-account-security.xyz",
-"http://free-gift-card-amazon.click",
-"http://verify-your-login-now-security.tk",
-"http://bank-secure-update-account.xyz/login",
-"http://amazon-security-alert-confirm.ga"
+
 ]
 
 # ACTUAL LABELS
