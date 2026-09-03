@@ -6,880 +6,131 @@
 <title>PhishShield — ML-Based Phishing Detection</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #080c14;
-    --surface: #0d1320;
-    --surface2: #121928;
-    --border: #1e2d45;
-    --accent: #00e5ff;
-    --accent2: #ff3c5c;
-    --warn: #ffb800;
-    --safe: #00e676;
-    --text: #e8f0fe;
-    --muted: #5a7090;
-    --mono: 'Space Mono', monospace;
-    --sans: 'Sora', sans-serif;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 48px;
-    background: rgba(8,12,20,0.85);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .logo {
-    font-family: var(--mono);
-    font-size: 1.1rem;
-    color: var(--accent);
-    letter-spacing: 2px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-  }
-
-  .logo svg { width: 28px; height: 32px; }
-
-  nav ul { display: flex; gap: 32px; list-style: none; }
-
-  nav ul li a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 500;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    transition: color 0.2s;
-    cursor: pointer;
-  }
-
-  nav ul li a:hover, nav ul li a.active { color: var(--accent); }
-
-  .page { display: none; position: relative; z-index: 1; }
-  .page.active { display: block; }
-  #home.page.active { display: flex; }
-
-  /* ══ HOME ══ */
-  #home {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 120px 24px 60px;
-  }
-
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    border: 1px solid rgba(0,229,255,0.25);
-    background: rgba(0,229,255,0.05);
-    color: var(--accent);
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    letter-spacing: 2px;
-    padding: 6px 16px;
-    border-radius: 2px;
-    margin-bottom: 28px;
-    animation: fadeUp 0.6s ease both;
-  }
-
-  .hero-badge::before {
-    content: '';
-    width: 6px; height: 6px;
-    background: var(--accent);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.7); }
-  }
-
-  h1 {
-    font-size: clamp(2.8rem, 6vw, 5rem);
-    font-weight: 800;
-    line-height: 1.05;
-    text-align: center;
-    max-width: 780px;
-    animation: fadeUp 0.6s 0.1s ease both;
-  }
-
-  h1 span {
-    color: transparent;
-    -webkit-text-stroke: 1.5px var(--accent);
-  }
-
-  .hero-sub {
-    margin-top: 20px;
-    color: var(--muted);
-    font-size: 1rem;
-    max-width: 520px;
-    text-align: center;
-    line-height: 1.7;
-    animation: fadeUp 0.6s 0.2s ease both;
-  }
-
-  .input-card {
-    margin-top: 52px;
-    width: 100%;
-    max-width: 680px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 36px 40px;
-    position: relative;
-    animation: fadeUp 0.6s 0.3s ease both;
-    box-shadow: 0 0 60px rgba(0,229,255,0.04);
-  }
-
-  .input-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent), transparent);
-  }
-
-  .input-label {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    color: var(--muted);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-    display: block;
-  }
-
-  .input-row { display: flex; gap: 12px; }
-
-  .url-input {
-    flex: 1;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 0.9rem;
-    padding: 14px 18px;
-    border-radius: 2px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-
-  .url-input::placeholder { color: var(--muted); }
-  .url-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0,229,255,0.08);
-  }
-
-  .check-btn {
-    background: var(--accent);
-    color: #000;
-    border: none;
-    font-family: var(--mono);
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    padding: 14px 28px;
-    border-radius: 2px;
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
-    white-space: nowrap;
-  }
-
-  .check-btn:hover {
-    background: #33eeff;
-    box-shadow: 0 0 20px rgba(0,229,255,0.4);
-    transform: translateY(-1px);
-  }
-
-  .check-btn:active { transform: translateY(0); }
-
-  .input-hint {
-    margin-top: 14px;
-    font-size: 0.78rem;
-    color: var(--muted);
-    display: flex;
-    gap: 20px;
-  }
-
-  .input-hint span::before {
-    content: '↳ ';
-    color: var(--accent);
-    font-family: var(--mono);
-  }
-
-  /* error state */
-  .error-box {
-    display: none;
-    margin-top: 14px;
-    background: rgba(255,60,92,0.07);
-    border: 1px solid rgba(255,60,92,0.3);
-    border-left: 3px solid var(--accent2);
-    padding: 12px 16px;
-    font-size: 0.82rem;
-    color: var(--accent2);
-    font-family: var(--mono);
-    border-radius: 0 2px 2px 0;
-  }
-
-  .error-box.show { display: block; }
-
-  .stats-row {
-    margin-top: 72px;
-    display: flex;
-    gap: 1px;
-    width: 100%;
-    max-width: 680px;
-    animation: fadeUp 0.6s 0.4s ease both;
-  }
-
-  .stat {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 24px 28px;
-    text-align: center;
-  }
-
-  .stat-num {
-    font-family: var(--mono);
-    font-size: 1.8rem;
-    color: var(--accent);
-    font-weight: 700;
-    display: block;
-  }
-
-  .stat-label {
-    font-size: 0.72rem;
-    color: var(--muted);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-top: 4px;
-  }
-
-  .features-row {
-    margin-top: 48px;
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: center;
-    max-width: 680px;
-    animation: fadeUp 0.6s 0.5s ease both;
-  }
-
-  .feat-pill {
-    background: rgba(0,229,255,0.04);
-    border: 1px solid rgba(0,229,255,0.15);
-    color: var(--accent);
-    font-size: 0.75rem;
-    font-family: var(--mono);
-    padding: 7px 16px;
-    border-radius: 2px;
-    letter-spacing: 1px;
-  }
-
-  /* ══ RESULT ══ */
-  #result {
-    min-height: 100vh;
-    padding: 120px 24px 80px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .result-header { text-align: center; margin-bottom: 40px; }
-
-  .result-url-display {
-    font-family: var(--mono);
-    font-size: 0.85rem;
-    color: var(--muted);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 10px 20px;
-    border-radius: 2px;
-    margin-bottom: 12px;
-    word-break: break-all;
-    max-width: 680px;
-    text-align: center;
-  }
-
-  .result-url-display span { color: var(--accent); }
-  .result-title { font-size: 1.8rem; font-weight: 700; margin-top: 8px; }
-
-  .verdict-card {
-    width: 100%;
-    max-width: 680px;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 28px;
-    position: relative;
-  }
-
-  .verdict-card.phishing {
-    border: 1px solid rgba(255,60,92,0.4);
-    box-shadow: 0 0 40px rgba(255,60,92,0.08);
-  }
-
-  .verdict-card.safe {
-    border: 1px solid rgba(0,230,118,0.4);
-    box-shadow: 0 0 40px rgba(0,230,118,0.08);
-  }
-
-  .verdict-card.warning {
-    border: 1px solid rgba(255,184,0,0.4);
-    box-shadow: 0 0 40px rgba(255,184,0,0.08);
-  }
-
-  .verdict-banner {
-    padding: 24px 32px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .verdict-card.phishing .verdict-banner {
-    background: rgba(255,60,92,0.08);
-    border-bottom: 1px solid rgba(255,60,92,0.2);
-  }
-
-  .verdict-card.safe .verdict-banner {
-    background: rgba(0,230,118,0.06);
-    border-bottom: 1px solid rgba(0,230,118,0.2);
-  }
-
-  .verdict-card.warning .verdict-banner {
-    background: rgba(255,184,0,0.06);
-    border-bottom: 1px solid rgba(255,184,0,0.2);
-  }
-
-  .verdict-icon { font-size: 2.5rem; line-height: 1; }
-
-  .verdict-label {
-    font-size: 1.6rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-  }
-
-  .verdict-card.phishing .verdict-label { color: var(--accent2); }
-  .verdict-card.safe .verdict-label { color: var(--safe); }
-  .verdict-card.warning .verdict-label { color: var(--warn); }
-
-  .verdict-sub { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
-
-  .verdict-body {
-    background: var(--surface);
-    padding: 28px 32px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-  }
-
-  .risk-section { grid-column: 1 / -1; }
-
-  .risk-label-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 10px;
-  }
-
-  .risk-label {
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    color: var(--muted);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  .risk-pct {
-    font-family: var(--mono);
-    font-size: 2rem;
-    font-weight: 700;
-  }
-
-  .risk-bar-track {
-    height: 8px;
-    background: rgba(255,255,255,0.06);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-
-  .risk-bar-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 1s cubic-bezier(0.4,0,0.2,1);
-  }
-
-  .risk-bar-fill.phishing-fill { background: linear-gradient(90deg, var(--warn), var(--accent2)); }
-  .risk-bar-fill.safe-fill { background: linear-gradient(90deg, #00c853, var(--safe)); }
-  .risk-bar-fill.warning-fill { background: linear-gradient(90deg, #e65100, var(--warn)); }
-
-  .detail-key {
-    font-family: var(--mono);
-    font-size: 0.68rem;
-    color: var(--muted);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-
-  .detail-val { font-size: 0.9rem; color: var(--text); font-weight: 500; }
-  .detail-val.bad { color: var(--accent2); }
-  .detail-val.ok { color: var(--safe); }
-  .detail-val.warn { color: var(--warn); }
-
-  /* reasons */
-  .reasons-card {
-    width: 100%;
-    max-width: 680px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 28px;
-    position: relative;
-  }
-
-  .reasons-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent2), transparent);
-  }
-
-  .card-head {
-    padding: 16px 28px;
-    border-bottom: 1px solid var(--border);
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    color: var(--muted);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  .reasons-list {
-    padding: 20px 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    list-style: none;
-  }
-
-  .reason-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    font-size: 0.88rem;
-    color: var(--text);
-    line-height: 1.5;
-  }
-
-  .reason-icon { font-size: 1rem; margin-top: 1px; flex-shrink: 0; }
-
-  .reason-weight {
-    margin-left: auto;
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    padding: 2px 8px;
-    border-radius: 2px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .reason-weight.high { color: var(--accent2); background: rgba(255,60,92,0.08); border: 1px solid rgba(255,60,92,0.2); }
-  .reason-weight.med  { color: var(--warn);    background: rgba(255,184,0,0.08);  border: 1px solid rgba(255,184,0,0.2); }
-  .reason-weight.low  { color: var(--safe);    background: rgba(0,230,118,0.08);  border: 1px solid rgba(0,230,118,0.25); }
-
-  /* XAI contribution display */
-  .reason-item.xai-positive {
-    border-left: 2px solid var(--accent2);
-    padding-left: 10px;
-  }
-
-  .reason-item.xai-negative {
-    border-left: 2px solid var(--safe);
-    padding-left: 10px;
-  }
-
-  .xai-impact {
-    margin-left: auto;
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    padding: 2px 8px;
-    border-radius: 2px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .xai-impact.positive {
-    color: var(--accent2);
-    background: rgba(255,60,92,0.08);
-    border: 1px solid rgba(255,60,92,0.2);
-  }
-
-  .xai-impact.negative {
-    color: var(--safe);
-    background: rgba(0,230,118,0.08);
-    border: 1px solid rgba(0,230,118,0.25);
-  }
-
-  .xai-note {
-    padding: 0 28px 18px;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    line-height: 1.6;
-  }
-
-  /* feature scores */
-  .features-card {
-    width: 100%;
-    max-width: 680px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 28px;
-    position: relative;
-  }
-
-  .features-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent), transparent);
-  }
-
-  .feature-rows { padding: 8px 0; }
-
-  .feature-row {
-    display: flex;
-    align-items: center;
-    padding: 12px 28px;
-    gap: 16px;
-    border-bottom: 1px solid rgba(30,45,69,0.5);
-  }
-
-  .feature-row:last-child { border-bottom: none; }
-
-  .feature-name {
-    font-family: var(--mono);
-    font-size: 0.78rem;
-    color: var(--muted);
-    width: 210px;
-    flex-shrink: 0;
-  }
-
-  .feature-bar-track {
-    flex: 1;
-    height: 6px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 1px;
-    overflow: hidden;
-  }
-
-  .feature-bar-fill {
-    height: 100%;
-    border-radius: 1px;
-    transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
-  }
-
-  .feature-bar-fill.danger  { background: var(--accent2); }
-  .feature-bar-fill.warning { background: var(--warn); }
-  .feature-bar-fill.normal  { background: var(--safe); }
-
-  .feature-val {
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    width: 44px;
-    text-align: right;
-    flex-shrink: 0;
-  }
-
-  .feature-val.danger  { color: var(--accent2); }
-  .feature-val.warning { color: var(--warn); }
-  .feature-val.normal  { color: var(--safe); }
-
-  .result-actions {
-    display: flex;
-    gap: 12px;
-    width: 100%;
-    max-width: 680px;
-    margin-bottom: 16px;
-  }
-
-  .btn-outline {
-    flex: 1;
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    letter-spacing: 1px;
-    padding: 12px;
-    border-radius: 2px;
-    cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
-  }
-
-  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-
-  .btn-primary {
-    flex: 1;
-    background: var(--accent);
-    border: none;
-    color: #000;
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    padding: 12px;
-    border-radius: 2px;
-    cursor: pointer;
-    transition: box-shadow 0.2s;
-  }
-
-  .btn-primary:hover { box-shadow: 0 0 20px rgba(0,229,255,0.3); }
-
-  .api-note {
-    width: 100%;
-    max-width: 680px;
-    background: rgba(0,229,255,0.04);
-    border: 1px solid rgba(0,229,255,0.15);
-    border-left: 3px solid var(--accent);
-    padding: 14px 20px;
-    font-size: 0.8rem;
-    color: var(--muted);
-    font-family: var(--mono);
-    border-radius: 0 2px 2px 0;
-  }
-
-  .api-note strong { color: var(--accent); }
-
-  /* ══ ABOUT ══ */
-  #about {
-    min-height: 100vh;
-    padding: 120px 24px 80px;
-    max-width: 780px;
-    margin: 0 auto;
-  }
-
-  .about-section-tag {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    color: var(--accent);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-
-  .about-h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: 16px; line-height: 1.1; }
-
-  .about-p { color: var(--muted); font-size: 0.95rem; line-height: 1.8; margin-bottom: 40px; }
-
-  .about-divider { height: 1px; background: var(--border); margin: 48px 0; }
-
-  .pipeline { display: flex; flex-direction: column; margin-bottom: 48px; }
-
-  .pipe-step {
-    display: flex;
-    gap: 24px;
-    align-items: flex-start;
-    padding: 24px 0;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .pipe-step:last-child { border-bottom: none; }
-
-  .pipe-num {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    color: var(--accent);
-    border: 1px solid rgba(0,229,255,0.25);
-    width: 36px; height: 36px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 2px;
-    flex-shrink: 0;
-    margin-top: 2px;
-    background: rgba(0,229,255,0.04);
-  }
-
-  .pipe-title { font-weight: 600; font-size: 1rem; margin-bottom: 6px; }
-  .pipe-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
-
-  .tech-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 48px;
-  }
-
-  .tech-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 18px 20px;
-    border-radius: 2px;
-    transition: border-color 0.2s;
-  }
-
-  .tech-item:hover { border-color: var(--accent); }
-  .tech-item-label { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
-  .tech-item-val { font-size: 0.9rem; font-weight: 500; color: var(--text); }
-
-  .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-
-  .team-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 20px;
-    border-radius: 2px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .team-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--accent);
-    transform: scaleX(0);
-    transition: transform 0.3s;
-  }
-
-  .team-card:hover::before { transform: scaleX(1); }
-
-  .team-avatar {
-    width: 44px; height: 44px;
-    background: linear-gradient(135deg, rgba(0,229,255,0.2), rgba(0,229,255,0.05));
-    border: 1px solid rgba(0,229,255,0.2);
-    border-radius: 2px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--mono);
-    font-size: 0.9rem;
-    color: var(--accent);
-    font-weight: 700;
-    margin-bottom: 14px;
-  }
-
-  .team-name { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
-  .team-usn { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); }
-
-  .sdg-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-
-  .sdg-badge {
-    font-family: var(--mono);
-    font-size: 0.68rem;
-    padding: 5px 12px;
-    border-radius: 2px;
-    letter-spacing: 1px;
-    background: rgba(0,229,255,0.06);
-    border: 1px solid rgba(0,229,255,0.18);
-    color: var(--accent);
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(18px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .spinner-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(8,12,20,0.85);
-    z-index: 200;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 20px;
-    backdrop-filter: blur(4px);
-  }
-
-  .spinner-overlay.show { display: flex; }
-
-  .spinner {
-    width: 48px; height: 48px;
-    border: 2px solid rgba(0,229,255,0.15);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .spinner-text {
-    font-family: var(--mono);
-    font-size: 0.8rem;
-    color: var(--muted);
-    letter-spacing: 2px;
-    animation: blink 1.2s step-end infinite;
-  }
-
-  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-  @media (max-width: 640px) {
-    nav { padding: 16px 20px; }
-    nav ul { gap: 18px; }
-    .input-card { padding: 24px 20px; }
-    .input-row { flex-direction: column; }
-    .verdict-body { grid-template-columns: 1fr; }
-    .tech-grid { grid-template-columns: repeat(2, 1fr); }
-    .team-grid { grid-template-columns: 1fr; }
-    .result-actions { flex-direction: column; }
-  }
-  html {
-  scroll-behavior: smooth;
+:root{
+  --bg:#080c14;--surface:#0d1320;--surface2:#121928;--border:#1e2d45;
+  --accent:#00e5ff;--accent2:#ff3c5c;--warn:#ffb800;--safe:#00e676;
+  --text:#e8f0fe;--muted:#5a7090;--mono:'Space Mono',monospace;--sans:'Sora',sans-serif;
 }
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(8,12,20,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.logo{font-family:var(--mono);font-size:1.1rem;color:var(--accent);letter-spacing:2px;display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo svg{width:28px;height:32px}
+nav ul{display:flex;gap:32px;list-style:none}
+nav a{color:var(--muted);text-decoration:none;font-size:.85rem;font-weight:500;letter-spacing:1px;text-transform:uppercase;transition:color .2s;cursor:pointer}
+nav a:hover,nav a.active{color:var(--accent)}
+.page{display:none;position:relative;z-index:1}
+.page.active{display:block}
+#home.page.active,#result.page.active{display:flex}
+#home{min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:120px 24px 70px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(0,229,255,.25);background:rgba(0,229,255,.05);color:var(--accent);font-family:var(--mono);font-size:.7rem;letter-spacing:2px;padding:6px 16px;border-radius:2px;margin-bottom:28px}
+.hero-badge:before{content:"";width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+h1{font-size:clamp(2.8rem,6vw,5rem);font-weight:800;line-height:1.05;text-align:center;max-width:780px}
+h1 span{color:transparent;-webkit-text-stroke:1.5px var(--accent)}
+.hero-sub{margin-top:20px;color:var(--muted);font-size:1rem;max-width:560px;text-align:center;line-height:1.7}
+.input-card{margin-top:52px;width:100%;max-width:720px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:36px 40px;position:relative;box-shadow:0 0 60px rgba(0,229,255,.04)}
+.input-card:before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent)}
+.input-label{font-family:var(--mono);font-size:.7rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:block}
+.input-row{display:flex;gap:12px}
+.url-input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:.9rem;padding:14px 18px;border-radius:2px;outline:none}
+.url-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,229,255,.08)}
+.url-input::placeholder{color:var(--muted)}
+.check-btn{background:var(--accent);color:#000;border:0;font-family:var(--mono);font-size:.8rem;font-weight:700;letter-spacing:1.5px;padding:14px 28px;border-radius:2px;cursor:pointer;white-space:nowrap}
+.check-btn:hover{background:#33eeff;box-shadow:0 0 20px rgba(0,229,255,.4)}
+.check-btn:disabled{opacity:.55;cursor:wait;box-shadow:none}
+.input-hint{margin-top:14px;font-size:.75rem;color:var(--muted);display:flex;gap:20px;flex-wrap:wrap}
+.input-hint span:before{content:"↳ ";color:var(--accent);font-family:var(--mono)}
+.error-box{display:none;margin-top:14px;background:rgba(255,60,92,.07);border:1px solid rgba(255,60,92,.3);border-left:3px solid var(--accent2);padding:12px 16px;font-size:.78rem;color:var(--accent2);font-family:var(--mono);line-height:1.5}
+.error-box.show{display:block}
+.stats-row{margin-top:72px;display:flex;gap:1px;width:100%;max-width:720px}
+.stat{flex:1;background:var(--surface);border:1px solid var(--border);padding:22px;text-align:center}
+.stat-num{font-family:var(--mono);font-size:1.7rem;color:var(--accent);font-weight:700;display:block}
+.stat-label{font-size:.68rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.features-row{margin-top:42px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:720px}
+.feat-pill{background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.15);color:var(--accent);font-size:.72rem;font-family:var(--mono);padding:7px 14px;border-radius:2px;letter-spacing:1px}
+#result{min-height:100vh;flex-direction:column;align-items:center;padding:120px 24px 80px}
+.result-header{text-align:center;margin-bottom:32px;width:100%;max-width:720px}
+.result-url-display{font-family:var(--mono);font-size:.8rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:10px 18px;border-radius:2px;word-break:break-all}
+.result-url-display span{color:var(--accent)}
+.result-title{font-size:1.8rem;font-weight:700;margin-top:12px}
+.verdict-card,.reasons-card,.features-card,.api-note{width:100%;max-width:720px}
+.verdict-card{border-radius:4px;overflow:hidden;margin-bottom:24px}
+.verdict-card.phishing{border:1px solid rgba(255,60,92,.4);box-shadow:0 0 40px rgba(255,60,92,.08)}
+.verdict-card.safe{border:1px solid rgba(0,230,118,.4);box-shadow:0 0 40px rgba(0,230,118,.08)}
+.verdict-card.warning{border:1px solid rgba(255,184,0,.4);box-shadow:0 0 40px rgba(255,184,0,.08)}
+.verdict-banner{padding:24px 30px;display:flex;align-items:center;gap:18px}
+.phishing .verdict-banner{background:rgba(255,60,92,.08);border-bottom:1px solid rgba(255,60,92,.2)}
+.safe .verdict-banner{background:rgba(0,230,118,.06);border-bottom:1px solid rgba(0,230,118,.2)}
+.warning .verdict-banner{background:rgba(255,184,0,.06);border-bottom:1px solid rgba(255,184,0,.2)}
+.verdict-icon{font-size:2.4rem;line-height:1}
+.verdict-label{font-size:1.5rem;font-weight:800}
+.phishing .verdict-label{color:var(--accent2)}.safe .verdict-label{color:var(--safe)}.warning .verdict-label{color:var(--warn)}
+.verdict-sub{font-size:.82rem;color:var(--muted);margin-top:3px}
+.verdict-body{background:var(--surface);padding:26px 30px;display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.risk-section{grid-column:1/-1}
+.risk-label-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.risk-label,.detail-key{font-family:var(--mono);font-size:.68rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+.risk-pct{font-family:var(--mono);font-size:2rem;font-weight:700}
+.risk-bar-track{height:8px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.risk-bar-fill{height:100%;border-radius:2px;width:0;transition:width .7s ease}
+.risk-bar-fill.phishing-fill{background:linear-gradient(90deg,var(--warn),var(--accent2))}
+.risk-bar-fill.safe-fill{background:linear-gradient(90deg,#00c853,var(--safe))}
+.risk-bar-fill.warning-fill{background:linear-gradient(90deg,#e65100,var(--warn))}
+.detail-key{margin-bottom:5px}.detail-val{font-size:.88rem;font-weight:500}.detail-val.bad{color:var(--accent2)}.detail-val.ok{color:var(--safe)}.detail-val.warn{color:var(--warn)}
+.reasons-card,.features-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:24px}
+.reasons-card{border-top:2px solid var(--accent2)}.features-card{border-top:2px solid var(--accent)}
+.card-head{padding:18px 28px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:.72rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+.reasons-list{list-style:none;padding:8px 28px 6px}
+.reason-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid rgba(30,45,69,.65);font-size:.8rem;line-height:1.5}
+.reason-item:last-child{border-bottom:0}
+.reason-icon{font-size:1rem;line-height:1.4;flex:0 0 auto}
+.reason-main{flex:1;min-width:0}.reason-main strong{color:var(--text)}
+.reason-positive{border-left:2px solid var(--accent2);padding-left:12px}.reason-negative{border-left:2px solid var(--safe);padding-left:12px}
+.xai-impact{margin-left:auto;font-family:var(--mono);font-size:.65rem;padding:3px 7px;border-radius:2px;white-space:nowrap;flex:0 0 auto}
+.xai-impact.positive{color:var(--accent2);background:rgba(255,60,92,.08);border:1px solid rgba(255,60,92,.2)}
+.xai-impact.negative{color:var(--safe);background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2)}
+.xai-note{padding:12px 28px 18px;color:var(--muted);font-family:var(--mono);font-size:.67rem;line-height:1.6}
+.feature-rows{padding:12px 28px 20px}
+.feature-row{display:grid;grid-template-columns:190px 1fr 58px;gap:12px;align-items:center;margin:11px 0}
+.feature-name{font-family:var(--mono);font-size:.68rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.feature-bar-track{height:7px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden}
+.feature-bar-fill{height:100%;border-radius:2px;transition:width .4s ease}
+.feature-bar-fill.normal{background:var(--accent)}.feature-bar-fill.warning{background:var(--warn)}.feature-bar-fill.danger{background:var(--accent2)}
+.feature-val{text-align:right;font-family:var(--mono);font-size:.68rem}.feature-val.normal{color:var(--accent)}.feature-val.warning{color:var(--warn)}.feature-val.danger{color:var(--accent2)}
+.result-actions{width:100%;max-width:720px;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.btn-outline,.btn-primary{padding:14px;border-radius:2px;font-family:var(--mono);font-size:.75rem;letter-spacing:1px;cursor:pointer}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted)}.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);border:1px solid var(--accent);color:#000;font-weight:700}.btn-primary:hover{background:#33eeff}
+.api-note{border:1px solid rgba(0,229,255,.18);border-left:3px solid var(--accent);background:rgba(0,229,255,.03);padding:12px 18px;color:var(--muted);font-family:var(--mono);font-size:.68rem;line-height:1.6}
+.api-note strong{color:var(--accent)}
+.empty-result{display:none;width:100%;max-width:720px;padding:40px;text-align:center;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:.8rem}
+#about{min-height:100vh;max-width:900px;margin:auto;padding:140px 28px 80px}
+.about-section-tag{font-family:var(--mono);font-size:.68rem;letter-spacing:2px;color:var(--accent);margin-bottom:12px}
+.about-h2{font-size:3rem;margin-bottom:18px}.about-p{color:var(--muted);line-height:1.8;max-width:800px}
+.about-divider{height:1px;background:var(--border);margin:40px 0}
+.pipeline{display:grid;gap:10px;margin:18px 0 40px}.pipe-step{display:grid;grid-template-columns:55px 1fr;gap:16px;padding:18px;background:var(--surface);border:1px solid var(--border)}
+.pipe-num{font-family:var(--mono);color:var(--accent);font-size:.8rem}.pipe-title{font-weight:600}.pipe-desc{color:var(--muted);font-size:.78rem;line-height:1.6;margin-top:5px}
+.tech-grid,.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0 40px}.tech-item,.team-card{background:var(--surface);border:1px solid var(--border);padding:18px}.tech-item-label{font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase}.tech-item-val{margin-top:6px}.team-card{text-align:center}.team-avatar{font-family:var(--mono);color:var(--accent);font-size:1.2rem}.team-name{font-size:.82rem;margin-top:8px}.team-usn{font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-top:5px}.sdg-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.sdg-badge{font-family:var(--mono);font-size:.65rem;padding:5px 10px;background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.18);color:var(--accent)}
+.spinner-overlay{display:none;position:fixed;inset:0;background:rgba(8,12,20,.88);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:18px;backdrop-filter:blur(4px)}.spinner-overlay.show{display:flex}.spinner{width:48px;height:48px;border:2px solid rgba(0,229,255,.15);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.spinner-text{font-family:var(--mono);font-size:.75rem;color:var(--muted);letter-spacing:2px}
+@media(max-width:700px){nav{padding:16px 20px}nav ul{gap:15px}.input-card{padding:25px 20px}.input-row{flex-direction:column}.stats-row{flex-wrap:wrap}.stat{min-width:45%}.verdict-body{grid-template-columns:1fr}.feature-row{grid-template-columns:145px 1fr 50px}.xai-impact{font-size:.58rem}.result-actions{grid-template-columns:1fr}.tech-grid,.team-grid{grid-template-columns:1fr}.about-h2{font-size:2.3rem}}
 </style>
 </head>
 <body>
 <nav>
   <div class="logo" onclick="showPage('home')">
-    <svg viewBox="0 0 28 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 28 32" fill="none" aria-hidden="true">
       <path d="M14 1L2 6V16C2 23.2 7.2 29.8 14 31C20.8 29.8 26 23.2 26 16V6L14 1Z" stroke="#00e5ff" stroke-width="1.5" fill="rgba(0,229,255,0.06)"/>
       <path d="M9 16L12.5 19.5L19 13" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
     PHISH<span style="color:#fff">SHIELD</span>
   </div>
   <ul>
-    <li><a href="#home" onclick="showPage('home'); return false;" id="nav-home">Home</a></li>
-<li><a href="#result" onclick="showPage('result'); return false;" id="nav-result">Result</a></li>
-<li><a href="#about" onclick="showPage('about'); return false;" id="nav-about">About</a></li>
+    <li><a href="#home" id="nav-home" onclick="showPage('home');return false">Home</a></li>
+    <li><a href="#result" id="nav-result" onclick="showPage('result');return false">Result</a></li>
+    <li><a href="#about" id="nav-about" onclick="showPage('about');return false">About</a></li>
   </ul>
 </nav>
 
@@ -888,30 +139,18 @@
   <div class="spinner-text" id="spinnerText">ANALYZING URL...</div>
 </div>
 
-<!-- ══ HOME ══ -->
 <section class="page active" id="home">
   <div class="hero-badge">ML-POWERED DETECTION SYSTEM</div>
   <h1>Detect <span>Phishing</span><br>Before It Strikes</h1>
-  <p class="hero-sub">
-    PhishShield uses Machine Learning + Explainable AI to analyze URLs in real time — giving you a risk score and clear reasons, not just a binary warning.
-  </p>
+  <p class="hero-sub">PhishShield uses Machine Learning + Explainable AI to analyze URLs in real time — giving you a risk score and clear reasons, not just a binary warning.</p>
 
   <div class="input-card">
-    <span class="input-label">Enter URL to scan</span>
+    <label class="input-label" for="urlInput">Enter URL to scan</label>
     <div class="input-row">
-      <input
-        class="url-input"
-        type="text"
-        id="urlInput"
-        placeholder="https://example.com/login?verify=..."
-        onkeydown="if(event.key==='Enter') checkURL()"
-      />
-      <button type="button" class="check-btn" onclick="checkURL()">CHECK URL</button>
+      <input class="url-input" type="text" id="urlInput" autocomplete="off" placeholder="https://example.com/login?verify=...">
+      <button type="button" class="check-btn" id="checkBtn" onclick="checkURL()">CHECK URL</button>
     </div>
-    <div class="input-hint">
-      <span>Supports HTTP &amp; HTTPS links</span>
-      <span>Results powered by ML model + XAI</span>
-    </div>
+    <div class="input-hint"><span>Supports HTTP &amp; HTTPS links</span><span>Results powered by ML model + XAI</span></div>
     <div class="error-box" id="errorBox"></div>
   </div>
 
@@ -923,434 +162,289 @@
   </div>
 
   <div class="features-row">
-    <span class="feat-pill">URL Length</span>
-    <span class="feat-pill">Suspicious Keywords</span>
-    <span class="feat-pill">HTTPS Check</span>
-    <span class="feat-pill">TLD Analysis</span>
-    <span class="feat-pill">Domain Structure</span>
-    <span class="feat-pill">Special Chars</span>
+    <span class="feat-pill">URL Length</span><span class="feat-pill">Suspicious Keywords</span>
+    <span class="feat-pill">HTTPS Check</span><span class="feat-pill">TLD Analysis</span>
+    <span class="feat-pill">Domain Structure</span><span class="feat-pill">Special Chars</span>
   </div>
 </section>
 
-<!-- ══ RESULT ══ -->
 <section class="page" id="result">
   <div class="result-header">
-    <div class="result-url-display">
-      Scanning: <span id="scannedUrl"></span>
-    </div>
+    <div class="result-url-display">Scanning: <span id="scannedUrl">No URL scanned yet</span></div>
     <div class="result-title">Analysis Complete</div>
   </div>
+
+  <div class="empty-result" id="emptyResult">Enter a URL on the Home page and click CHECK URL to run the ML + XAI analysis.</div>
 
   <div class="verdict-card" id="verdictCard">
     <div class="verdict-banner">
       <div class="verdict-icon" id="verdictIcon">⚠️</div>
-      <div>
-        <div class="verdict-label" id="verdictLabel">PHISHING DETECTED</div>
-        <div class="verdict-sub" id="verdictSub">High confidence — do not visit this URL</div>
-      </div>
+      <div><div class="verdict-label" id="verdictLabel">WAITING FOR SCAN</div><div class="verdict-sub" id="verdictSub">Run a URL analysis to see the model result.</div></div>
     </div>
     <div class="verdict-body">
       <div class="risk-section">
-        <div class="risk-label-row">
-          <span class="risk-label">Confidence Score</span>
-          <span class="risk-pct" id="riskPct">82%</span>
-        </div>
-        <div class="risk-bar-track">
-          <div class="risk-bar-fill" id="riskBarFill" style="width:0%"></div>
-        </div>
+        <div class="risk-label-row"><span class="risk-label">Confidence Score</span><span class="risk-pct" id="riskPct">—</span></div>
+        <div class="risk-bar-track"><div class="risk-bar-fill" id="riskBarFill"></div></div>
       </div>
-      <div class="detail-item">
-        <div class="detail-key">Model</div>
-        <div class="detail-val">Random Forest</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-key">Threshold</div>
-        <div class="detail-val">≥ 70% = Phishing</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-key">URL Length</div>
-        <div class="detail-val" id="urlLen">—</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-key">HTTPS</div>
-        <div class="detail-val" id="httpsVal">—</div>
-      </div>
+      <div class="detail-item"><div class="detail-key">Model</div><div class="detail-val">Random Forest</div></div>
+      <div class="detail-item"><div class="detail-key">Threshold</div><div class="detail-val">≥ 70% = Phishing</div></div>
+      <div class="detail-item"><div class="detail-key">URL Length</div><div class="detail-val" id="urlLen">—</div></div>
+      <div class="detail-item"><div class="detail-key">HTTPS</div><div class="detail-val" id="httpsVal">—</div></div>
     </div>
   </div>
 
   <div class="reasons-card">
     <div class="card-head">🧠 Why was this flagged? — XAI Feature Analysis</div>
     <ul class="reasons-list" id="reasonsList"></ul>
-    <div class="xai-note">
-      SHAP shows how each top feature contributed to the model's prediction.
-      Positive values push the prediction toward phishing; negative values push it away from phishing.
-    </div>
+    <div class="xai-note">SHAP shows how each top feature contributed to the model's prediction. Positive values push the prediction toward phishing; negative values push it away from phishing.</div>
   </div>
 
   <div class="features-card">
-    <div class="card-head">📊 Extracted URL Features (from your ML model)</div>
+    <div class="card-head">📊 Extracted URL Features (17 features)</div>
     <div class="feature-rows" id="featureRows"></div>
   </div>
 
   <div class="result-actions">
-    <button class="btn-outline" onclick="showPage('home')">← Check Another URL</button>
-    <button class="btn-primary" onclick="showPage('about')">ℹ How It Works</button>
+    <button type="button" class="btn-outline" onclick="showPage('home')">← Check Another URL</button>
+    <button type="button" class="btn-primary" onclick="showPage('about')">ℹ How It Works</button>
   </div>
 
-  <div class="api-note">
-    <strong>Connected:</strong> Results are from your trained ML model via
-    <code>POST http://127.0.0.1:5000/predict</code>
-  </div>
+  <div class="api-note"><strong>Connected:</strong> Results are from your trained ML model via <code>POST /predict</code>.</div>
 </section>
 
-<!-- ══ ABOUT ══ -->
 <section class="page" id="about">
   <div class="about-section-tag">// ABOUT THE PROJECT</div>
   <h2 class="about-h2">PhishShield</h2>
-  <p class="about-p">
-    PhishShield is a Machine Learning-based phishing detection and prevention system developed as a Major Project at BMS Institute of Technology and Management, Bengaluru. It combines advanced feature extraction, supervised ML models, and Explainable AI (XAI) to identify malicious URLs in real time — giving users clear, understandable reasons behind every decision.
-  </p>
-  <div class="sdg-row">
-    <span class="sdg-badge">SDG 9 — Industry & Innovation</span>
-    <span class="sdg-badge">SDG 16 — Peace & Justice</span>
-    <span class="sdg-badge">SDG 4 — Quality Education</span>
-  </div>
-
+  <p class="about-p">PhishShield is a Machine Learning-based phishing detection and prevention system. It combines URL feature extraction, a Random Forest classifier, and Explainable AI to provide a prediction together with understandable feature contributions.</p>
+  <div class="sdg-row"><span class="sdg-badge">SDG 9 — Industry &amp; Innovation</span><span class="sdg-badge">SDG 16 — Peace &amp; Justice</span><span class="sdg-badge">SDG 4 — Quality Education</span></div>
   <div class="about-divider"></div>
-
   <div class="about-section-tag">// HOW IT WORKS</div>
   <div class="pipeline">
-    <div class="pipe-step"><div class="pipe-num">01</div><div><div class="pipe-title">Data Collection &amp; Preprocessing</div><div class="pipe-desc">URLs collected from PhishTank, OpenPhish, and Kaggle. Cleaned, normalized, and balanced using resampling techniques.</div></div></div>
-    <div class="pipe-step"><div class="pipe-num">02</div><div><div class="pipe-title">Feature Extraction (17 Features)</div><div class="pipe-desc">URL length, dot/dash/slash counts, HTTPS status, @ symbol, digit count, suspicious keywords, risky TLDs, subdomain depth, domain digit presence, long URL flag.</div></div></div>
-    <div class="pipe-step"><div class="pipe-num">03</div><div><div class="pipe-title">ML Classification — Random Forest</div><div class="pipe-desc">Model trained and saved as <code>url_model.pkl</code>. Loaded via joblib at runtime. Threshold set at 0.7 for phishing classification.</div></div></div>
-    <div class="pipe-step"><div class="pipe-num">04</div><div><div class="pipe-title">Risk Score Computation</div><div class="pipe-desc">predict_proba() output converted to percentage. Below 70% → Safe. Above 70% → Phishing.</div></div></div>
-    <div class="pipe-step"><div class="pipe-num">05</div><div><div class="pipe-title">Explainable Alerts</div><div class="pipe-desc">Feature values analyzed per URL and mapped to human-readable reasons shown in the Result page.</div></div></div>
-    <div class="pipe-step"><div class="pipe-num">06</div><div><div class="pipe-title">Flask REST API</div><div class="pipe-desc">Frontend sends POST to <code>/predict</code> with the URL. Backend responds with <code>is_phishing</code> and <code>confidence</code> values.</div></div></div>
+    <div class="pipe-step"><div class="pipe-num">01</div><div><div class="pipe-title">Data Collection &amp; Preprocessing</div><div class="pipe-desc">URLs are cleaned and prepared for supervised machine-learning training.</div></div></div>
+    <div class="pipe-step"><div class="pipe-num">02</div><div><div class="pipe-title">Feature Extraction — 17 Features</div><div class="pipe-desc">URL length, punctuation counts, HTTP/HTTPS status, suspicious keywords, TLD, subdomain structure, domain digits and related URL properties.</div></div></div>
+    <div class="pipe-step"><div class="pipe-num">03</div><div><div class="pipe-title">ML Classification — Random Forest</div><div class="pipe-desc">The trained Random Forest model returns a phishing probability through predict_proba(). The project uses a 0.7 phishing threshold.</div></div></div>
+    <div class="pipe-step"><div class="pipe-num">04</div><div><div class="pipe-title">Explainable AI — SHAP</div><div class="pipe-desc">SHAP identifies the strongest feature contributions for the individual URL prediction and the frontend presents them as human-readable explanations.</div></div></div>
+    <div class="pipe-step"><div class="pipe-num">05</div><div><div class="pipe-title">Flask REST API</div><div class="pipe-desc">The frontend sends a POST request to /predict and receives the prediction, confidence and XAI explanation.</div></div></div>
   </div>
-
   <div class="about-section-tag">// TECH STACK</div>
   <div class="tech-grid">
     <div class="tech-item"><div class="tech-item-label">Language</div><div class="tech-item-val">Python 3.x</div></div>
     <div class="tech-item"><div class="tech-item-label">ML Library</div><div class="tech-item-val">Scikit-learn</div></div>
     <div class="tech-item"><div class="tech-item-label">Model</div><div class="tech-item-val">Random Forest</div></div>
+    <div class="tech-item"><div class="tech-item-label">XAI</div><div class="tech-item-val">SHAP</div></div>
     <div class="tech-item"><div class="tech-item-label">Web Framework</div><div class="tech-item-val">Flask + CORS</div></div>
     <div class="tech-item"><div class="tech-item-label">Model Storage</div><div class="tech-item-val">joblib (.pkl)</div></div>
-    <div class="tech-item"><div class="tech-item-label">Data Sources</div><div class="tech-item-val">PhishTank, Kaggle</div></div>
   </div>
-
   <div class="about-section-tag">// TEAM — BATCH 3</div>
   <div class="team-grid">
     <div class="team-card"><div class="team-avatar">DK</div><div class="team-name">D Nanditha Kale</div><div class="team-usn">1BY23CB012</div></div>
     <div class="team-card"><div class="team-avatar">SK</div><div class="team-name">Sneha Kumari</div><div class="team-usn">1BY23CB065</div></div>
     <div class="team-card"><div class="team-avatar">PM</div><div class="team-name">Priyanka S M</div><div class="team-usn">1BY24CB402</div></div>
   </div>
-
   <div class="about-divider"></div>
-  <p style="font-size:0.8rem; color:var(--muted); font-family:var(--mono);">
-    Guide: Prof. Harshitha B K &nbsp;|&nbsp; Subject: BCBP606 &nbsp;|&nbsp; BMSIT&amp;M, Bengaluru
-  </p>
+  <p style="font-size:.75rem;color:var(--muted);font-family:var(--mono)">Guide: Prof. Harshitha B K &nbsp;|&nbsp; Subject: BCBP606 &nbsp;|&nbsp; BMSIT&amp;M, Bengaluru</p>
 </section>
 
 <script>
-  // ── Page navigation ──
- function showPage(name) {
-  // hide all pages
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+"use strict";
 
-  // show selected page
-  const page = document.getElementById(name);
-  if (page) page.classList.add('active');
+const API_URL = "http://127.0.0.1:5000/predict";
+let lastResult = null;
 
-  // update nav highlight
-  document.querySelectorAll('nav ul li a').forEach(a => a.classList.remove('active'));
-  const navItem = document.getElementById('nav-' + name);
-  if (navItem) navItem.classList.add('active');
+const SUSPICIOUS_WORDS = ["login","secure","verify","account","bank","update","free","bonus","paypal","signin","confirm","security","alert"];
+const SUSPICIOUS_TLDS = [".xyz",".tk",".ml",".ga",".cf",".gq",".top",".biz",".info"];
 
-  // 🔥 RESET SCROLL
-  window.scrollTo({ top: 0, behavior: "smooth" });
+const FEATURE_META = [
+  ["url_length","URL length",150],
+  ["dot_count","Number of dots",8],
+  ["dash_count","Number of hyphens",6],
+  ["slash_count","Number of slashes",10],
+  ["equals_count","Number of equal signs",5],
+  ["has_https","HTTPS present",1],
+  ["has_http_only","HTTP without HTTPS",1],
+  ["has_at_symbol","@ symbol present",1],
+  ["digit_count","Number of digits",20],
+  ["has_suspicious_word","Suspicious word present",1],
+  ["suspicious_word_count","Number of suspicious words",5],
+  ["has_suspicious_tld","Suspicious TLD",1],
+  ["deep_subdomain","Multiple subdomains",1],
+  ["has_dash_in_domain","Hyphen in domain",1],
+  ["domain_has_digits","Digit in domain",1],
+  ["domain_length","Domain length",50],
+  ["is_long_url","URL length > 60",1]
+];
 
-  // 🔥 FORCE REPAINT (important)
-  document.body.style.display = 'none';
-  document.body.offsetHeight; // trigger reflow
-  document.body.style.display = '';
+function showPage(name){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  const page=document.getElementById(name);
+  if(page) page.classList.add("active");
+  document.querySelectorAll("nav a").forEach(a=>a.classList.remove("active"));
+  const link=document.getElementById("nav-"+name);
+  if(link) link.classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+  if(name==="result" && !lastResult){
+    document.getElementById("emptyResult").style.display="block";
+  }else{
+    document.getElementById("emptyResult").style.display="none";
+  }
 }
 
-  // ── Feature extractor (mirrors your shared/feature_extractor.py exactly) ──
-  function extractFeatures(url) {
-    const lower = url.toLowerCase();
-    const suspiciousWords = ["login","secure","verify","account","bank","update","free","bonus","paypal","signin","confirm","security","alert"];
-    const suspiciousTlds  = [".xyz",".tk",".ml",".ga",".cf",".gq",".top",".biz",".info"];
+function extractFeatures(url){
+  const lower=String(url).toLowerCase();
+  let domain="";
+  try{domain=new URL(lower).hostname;}catch(e){domain=lower.split("/")[0].split("?")[0];}
+  const digitCount=(lower.match(/\d/g)||[]).length;
+  const hasSuspWord=SUSPICIOUS_WORDS.some(w=>lower.includes(w));
+  const suspWordCount=SUSPICIOUS_WORDS.filter(w=>lower.includes(w)).length;
+  const hasSuspTld=SUSPICIOUS_TLDS.some(t=>domain.endsWith(t) || lower.includes(t));
+  const domainDots=(domain.match(/\./g)||[]).length;
+  return {
+    url_length:lower.length,
+    dot_count:(lower.match(/\./g)||[]).length,
+    dash_count:(lower.match(/-/g)||[]).length,
+    slash_count:(lower.match(/\//g)||[]).length,
+    equals_count:(lower.match(/=/g)||[]).length,
+    has_https:lower.startsWith("https://")?1:0,
+    has_http_only:lower.startsWith("http://")?1:0,
+    has_at_symbol:lower.includes("@")?1:0,
+    digit_count:digitCount,
+    has_suspicious_word:hasSuspWord?1:0,
+    suspicious_word_count:suspWordCount,
+    has_suspicious_tld:hasSuspTld?1:0,
+    deep_subdomain:domainDots>2?1:0,
+    has_dash_in_domain:domain.includes("-")?1:0,
+    domain_has_digits:/\d/.test(domain)?1:0,
+    domain_length:domain.length,
+    is_long_url:lower.length>60?1:0
+  };
+}
 
-    let domain = '';
-    try { domain = new URL(lower).hostname; } catch(e) { domain = lower.split('/')[0]; }
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
 
-    const digitCount = (lower.match(/\d/g) || []).length;
-    const hasSuspWord = suspiciousWords.some(w => lower.includes(w));
-    const suspWordCount = suspiciousWords.filter(w => lower.includes(w)).length;
-    const hasSuspTld = suspiciousTlds.some(t => lower.includes(t));
-    const domainDots = (domain.match(/\./g) || []).length;
+function renderFeatureRows(features){
+  const danger=new Set(["has_suspicious_word","has_suspicious_tld","has_http_only","has_at_symbol","deep_subdomain","has_dash_in_domain","domain_has_digits","is_long_url","suspicious_word_count"]);
+  const warning=new Set(["url_length","dash_count","digit_count","equals_count","dot_count"]);
+  document.getElementById("featureRows").innerHTML=FEATURE_META.map(([key,label,max])=>{
+    const raw=Number(features[key])||0;
+    const pct=Math.min(100,Math.round((raw/max)*100));
+    const cls=danger.has(key)&&raw>0?"danger":warning.has(key)&&pct>40?"warning":"normal";
+    const display=max===1?(raw?"YES":"NO"):raw;
+    return `<div class="feature-row">
+      <span class="feature-name" title="${escapeHtml(label)}">${escapeHtml(label)}</span>
+      <div class="feature-bar-track"><div class="feature-bar-fill ${cls}" style="width:${pct}%"></div></div>
+      <span class="feature-val ${cls}">${display}</span>
+    </div>`;
+  }).join("");
+}
 
-    return {
-      url_length:          lower.length,
-      dot_count:           (lower.match(/\./g) || []).length,
-      dash_count:          (lower.match(/-/g) || []).length,
-      slash_count:         (lower.match(/\//g) || []).length,
-      equals_count:        (lower.match(/=/g) || []).length,
-      has_https:           lower.startsWith("https") ? 1 : 0,
-      has_http_only:       (lower.startsWith("http") && !lower.startsWith("https")) ? 1 : 0,
-      has_at_symbol:       lower.includes('@') ? 1 : 0,
-      digit_count:         digitCount,
-      has_suspicious_word: hasSuspWord ? 1 : 0,
-      suspicious_word_count: suspWordCount,
-      has_suspicious_tld:  hasSuspTld ? 1 : 0,
-      deep_subdomain:      domainDots > 2 ? 1 : 0,
-      has_dash_in_domain:  domain.includes('-') ? 1 : 0,
-      domain_has_digits:   /\d/.test(domain) ? 1 : 0,
-      domain_length:       domain.length,
-      is_long_url:         lower.length > 60 ? 1 : 0,
-    };
+function renderXAI(explanation){
+  const list=document.getElementById("reasonsList");
+  if(!Array.isArray(explanation)||explanation.length===0){
+    list.innerHTML=`<li class="reason-item"><span class="reason-icon">⚠️</span><span class="reason-main">The backend did not return a SHAP explanation for this prediction.</span></li>`;
+    return;
   }
+  list.innerHTML=explanation.map(item=>{
+    const value=Number(item.impact)||0;
+    const positive=value>=0;
+    const icon=positive?"🔴":"🟢";
+    const direction=positive?"TOWARD PHISHING":"AWAY FROM PHISHING";
+    const cls=positive?"reason-positive":"reason-negative";
+    const impactClass=positive?"positive":"negative";
+    return `<li class="reason-item ${cls}">
+      <span class="reason-icon">${icon}</span>
+      <span class="reason-main"><strong>${escapeHtml(item.feature||"Feature")}</strong> — ${escapeHtml(item.reason||"Feature contribution returned by SHAP.")}</span>
+      <span class="xai-impact ${impactClass}">${direction} ${value>=0?"+":""}${value.toFixed(4)}</span>
+    </li>`;
+  }).join("");
+}
 
-  // ── Build human-readable reasons from features ──
-  function buildReasons(features, url, isPhishing) {
-    const reasons = [];
+function renderResult(url,isPhishing,confidence,explanation){
+  const features=extractFeatures(url);
+  const pct=Math.round(Math.max(0,Math.min(1,Number(confidence)||0))*100);
+  const card=document.getElementById("verdictCard");
+  const bar=document.getElementById("riskBarFill");
+  const https=document.getElementById("httpsVal");
+  const urlLen=document.getElementById("urlLen");
 
-    if (isPhishing) {
-      if (features.has_suspicious_word) {
-        const words = ["login","secure","verify","account","bank","update","free","bonus","paypal","signin","confirm","security","alert"];
-        const found = words.filter(w => url.toLowerCase().includes(w));
-        reasons.push({ icon:'🔴', text: `Suspicious keyword(s) detected in URL: <code>${found.join(', ')}</code>`, weight:'high' });
-      }
-      if (features.has_suspicious_tld) {
-        const tlds = [".xyz",".tk",".ml",".ga",".cf",".gq",".top",".biz",".info"];
-        const found = tlds.filter(t => url.toLowerCase().includes(t));
-        reasons.push({ icon:'🔴', text: `High-risk free TLD detected: <code>${found.join(', ')}</code> — commonly used in phishing`, weight:'high' });
-      }
-      if (features.has_dash_in_domain)  reasons.push({ icon:'🟡', text: 'Hyphen in domain name — often used to mimic legitimate brands (e.g. paypal-login.com)', weight:'med' });
-      if (features.is_long_url)          reasons.push({ icon:'🟡', text: `URL length is ${features.url_length} characters — unusually long URLs are a common phishing indicator`, weight:'med' });
-      if (features.has_http_only)        reasons.push({ icon:'🟡', text: 'No HTTPS — connection is not encrypted, typical of malicious pages', weight:'med' });
-      if (features.has_at_symbol)        reasons.push({ icon:'🔴', text: 'Contains @ symbol — used to trick browsers into ignoring the real domain', weight:'high' });
-      if (features.deep_subdomain)       reasons.push({ icon:'🟡', text: 'Deep subdomain structure detected — phishing sites hide behind multiple subdomains', weight:'med' });
-      if (features.domain_has_digits)    reasons.push({ icon:'🟡', text: 'Domain contains digits — legitimate brands rarely use numbers in their domain name', weight:'med' });
-      if (features.suspicious_word_count > 1) reasons.push({ icon:'🔴', text: `Multiple suspicious keywords (${features.suspicious_word_count}) found — high probability of social engineering attempt`, weight:'high' });
-    } else {
-      reasons.push({ icon:'🟢', text: 'No suspicious keywords detected in URL structure', weight:'low' });
-      if (features.has_https) reasons.push({ icon:'🟢', text: 'HTTPS present — connection appears encrypted and secure', weight:'low' });
-      if (!features.has_suspicious_tld) reasons.push({ icon:'🟢', text: 'TLD appears legitimate — not associated with known free/risky domains', weight:'low' });
-      if (!features.is_long_url) reasons.push({ icon:'🟢', text: `URL length is ${features.url_length} characters — within normal range`, weight:'low' });
-    }
+  card.classList.remove("phishing","safe","warning");
+  const phishing=Boolean(isPhishing);
+  const classification=phishing?"phishing":"safe";
+  card.classList.add(classification);
 
-    if (reasons.length === 0) {
-      reasons.push({ icon: isPhishing ? '🔴' : '🟢', text: isPhishing ? 'ML model flagged this URL based on combined feature pattern analysis' : 'URL passed all feature checks — classified as legitimate', weight: isPhishing ? 'high' : 'low' });
-    }
+  document.getElementById("scannedUrl").textContent=url;
+  document.getElementById("verdictIcon").textContent=phishing?"🚨":"🛡️";
+  document.getElementById("verdictLabel").textContent=phishing?"PHISHING DETECTED":"LIKELY SAFE";
+  document.getElementById("verdictSub").textContent=phishing?"High model confidence — avoid visiting this URL.":"The model did not classify this URL as phishing.";
+  document.getElementById("riskPct").textContent=pct+"%";
+  bar.className="risk-bar-fill "+(phishing?"phishing-fill":"safe-fill");
+  requestAnimationFrame(()=>bar.style.width=pct+"%");
+  urlLen.textContent=features.url_length+" chars";
+  urlLen.className="detail-val";
+  https.textContent=features.has_https?"Yes":"No";
+  https.className="detail-val "+(features.has_https?"ok":"bad");
 
-    return reasons;
-  }
+  renderXAI(explanation);
+  renderFeatureRows(features);
+  document.getElementById("emptyResult").style.display="none";
+}
 
-  // ── Build feature bar rows ──
-  function buildFeatureBars(features) {
-    // Max normalisation values for bar display
-    const maxVals = {
-      url_length: 150, dot_count: 8, dash_count: 6, slash_count: 10,
-      equals_count: 5, digit_count: 20, suspicious_word_count: 5,
-      domain_length: 50
-    };
+async function checkURL(){
+  const input=document.getElementById("urlInput");
+  const btn=document.getElementById("checkBtn");
+  const error=document.getElementById("errorBox");
+  const url=input.value.trim();
 
-    const rows = [
-      { name: 'url_length',           label: 'url_length',            val: features.url_length,           max: maxVals.url_length },
-      { name: 'has_https',            label: 'has_https',             val: features.has_https,             max: 1 },
-      { name: 'has_http_only',        label: 'has_http_only',         val: features.has_http_only,         max: 1 },
-      { name: 'has_suspicious_word',  label: 'has_suspicious_word',   val: features.has_suspicious_word,   max: 1 },
-      { name: 'suspicious_word_count',label: 'suspicious_word_count', val: features.suspicious_word_count, max: maxVals.suspicious_word_count },
-      { name: 'has_suspicious_tld',   label: 'has_suspicious_tld',    val: features.has_suspicious_tld,    max: 1 },
-      { name: 'has_dash_in_domain',   label: 'has_dash_in_domain',    val: features.has_dash_in_domain,    max: 1 },
-      { name: 'deep_subdomain',       label: 'deep_subdomain',        val: features.deep_subdomain,        max: 1 },
-      { name: 'is_long_url',          label: 'is_long_url',           val: features.is_long_url,           max: 1 },
-      { name: 'has_at_symbol',        label: 'has_at_symbol',         val: features.has_at_symbol,         max: 1 },
-      { name: 'domain_has_digits',    label: 'domain_has_digits',     val: features.domain_has_digits,     max: 1 },
-      { name: 'digit_count',          label: 'digit_count',           val: features.digit_count,           max: maxVals.digit_count },
-      { name: 'dash_count',           label: 'dash_count',            val: features.dash_count,            max: maxVals.dash_count },
-      { name: 'dot_count',            label: 'dot_count',             val: features.dot_count,             max: maxVals.dot_count },
-      { name: 'slash_count',          label: 'slash_count',           val: features.slash_count,           max: maxVals.slash_count },
-      { name: 'domain_length',        label: 'domain_length',         val: features.domain_length,         max: maxVals.domain_length },
-      { name: 'equals_count',         label: 'equals_count',          val: features.equals_count,          max: maxVals.equals_count },
-    ];
+  error.classList.remove("show");
+  error.textContent="";
 
-    // Risky features get red bars
-    const dangerFeatures = ['has_suspicious_word','has_suspicious_tld','has_http_only','has_at_symbol','deep_subdomain','has_dash_in_domain','domain_has_digits','is_long_url','suspicious_word_count'];
-    const warnFeatures   = ['url_length','dash_count','digit_count','equals_count','dot_count'];
-
-    return rows.map(r => {
-      const pct = Math.min(100, Math.round((r.val / r.max) * 100));
-      const isDanger = dangerFeatures.includes(r.name) && r.val > 0;
-      const isWarn   = warnFeatures.includes(r.name) && pct > 40;
-      const cls = isDanger ? 'danger' : isWarn ? 'warning' : 'normal';
-      const displayVal = r.max === 1 ? (r.val ? 'YES' : 'NO') : r.val;
-      return `
-        <div class="feature-row">
-          <span class="feature-name">${r.label}</span>
-          <div class="feature-bar-track">
-            <div class="feature-bar-fill ${cls}" style="width:${pct}%"></div>
-          </div>
-          <span class="feature-val ${cls}">${displayVal}</span>
-        </div>`;
-    }).join('');
-  }
-
-  // ── Main checkURL — calls real Flask backend ──
-  async function checkURL() {
-  const input = document.getElementById("urlInput").value;
-
-  if (!input.trim()) {
-    const errorBox = document.getElementById("errorBox");
-    errorBox.textContent = "Please enter a URL.";
-    errorBox.classList.add("show");
+  if(!url){
+    error.textContent="Please enter a URL.";
+    error.classList.add("show");
+    input.focus();
     return;
   }
 
-  document.getElementById("errorBox").classList.remove("show");
+  btn.disabled=true;
+  document.getElementById("spinner").classList.add("show");
+  document.getElementById("spinnerText").textContent="ANALYZING URL...";
 
-  try {
-    // 🔥 call backend
-    const API_BASE = window.location.protocol === "file:"
-      ? "http://127.0.0.1:5000"
-      : "";
-    const response = await fetch(API_BASE + "/predict", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ url: input })
+  try{
+    const response=await fetch(API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({url:url})
     });
 
-    if (!response.ok) {
-      let message = "Backend returned an error.";
-      try {
-        const errorData = await response.json();
-        if (errorData.error) message = errorData.error;
-      } catch (_) {}
-      throw new Error(message);
+    let data={};
+    try{data=await response.json();}catch(e){}
+
+    if(!response.ok){
+      throw new Error(data.error || ("Backend returned HTTP "+response.status));
     }
 
-    const data = await response.json();
+    if(typeof data.is_phishing==="undefined" || typeof data.confidence==="undefined"){
+      throw new Error("Backend response is missing is_phishing or confidence.");
+    }
 
-    console.log("API response:", data); // debug
-
-    const isPhishing = data.is_phishing;
-    const confidence = data.confidence;
-    const explanation = Array.isArray(data.explanation) ? data.explanation : [];
-
-    const score = Math.round(confidence * 100);
-
-    // 🔥 render real result + XAI explanation
-    renderResult(input, isPhishing, score, confidence, explanation);
-
-  } catch (error) {
-    console.error("Error:", error);
-    const errorBox = document.getElementById("errorBox");
-    errorBox.textContent =
-      "⚠ " + (error.message || "Cannot connect to backend.") +
-      " Make sure Flask is running at http://127.0.0.1:5000.";
-    errorBox.classList.add("show");
+    lastResult=data;
+    renderResult(url,data.is_phishing,data.confidence,data.explanation);
+    showPage("result");
+  }catch(err){
+    console.error("PhishShield API error:",err);
+    error.textContent="⚠ "+err.message+" Make sure Flask is running with: python run.py";
+    error.classList.add("show");
+  }finally{
+    btn.disabled=false;
+    document.getElementById("spinner").classList.remove("show");
   }
 }
 
-  // ── Render result page with real data ──
-  function renderResult(url, isPhishing, score, confidence, explanation) {
-    // Extract features client-side (mirrors feature_extractor.py) for display
-    const features = extractFeatures(url);
-
-    // ── Scanned URL display ──
-    document.getElementById('scannedUrl').textContent = url;
-
-    // ── URL detail fields ──
-    const urlLenEl  = document.getElementById('urlLen');
-    const httpsEl   = document.getElementById('httpsVal');
-    urlLenEl.textContent  = url.length + ' chars';
-    urlLenEl.className    = 'detail-val ' + (url.length > 60 ? 'warn' : 'ok');
-    httpsEl.textContent   = features.has_https ? 'Yes ✓' : 'No ✗';
-    httpsEl.className     = 'detail-val ' + (features.has_https ? 'ok' : 'bad');
-
-    // ── Verdict card ──
-    const card   = document.getElementById('verdictCard');
-    const icon   = document.getElementById('verdictIcon');
-    const label  = document.getElementById('verdictLabel');
-    const sub    = document.getElementById('verdictSub');
-    const pct    = document.getElementById('riskPct');
-    const fill   = document.getElementById('riskBarFill');
-
-    // Determine risk tier
-    let tier, cardClass, fillClass;
-    if (isPhishing && score >= 85) {
-      tier = 'HIGH RISK'; cardClass = 'phishing'; fillClass = 'phishing-fill';
-    } else if (isPhishing) {
-      tier = 'MEDIUM RISK'; cardClass = 'warning'; fillClass = 'warning-fill';
-    } else {
-      tier = 'LOW RISK'; cardClass = 'safe'; fillClass = 'safe-fill';
-    }
-
-    card.className  = 'verdict-card ' + cardClass;
-    pct.style.color = cardClass === 'phishing' ? 'var(--accent2)' : cardClass === 'warning' ? 'var(--warn)' : 'var(--safe)';
-
-    if (isPhishing) {
-      icon.textContent  = score >= 85 ? '🚨' : '⚠️';
-      label.textContent = score >= 85 ? 'PHISHING DETECTED' : 'SUSPICIOUS URL';
-      sub.textContent   = score >= 85
-        ? 'High confidence — do not visit this URL'
-        : 'Moderate risk — proceed with extreme caution';
-    } else {
-      icon.textContent  = '✅';
-      label.textContent = 'SAFE URL';
-      sub.textContent   = 'Low risk — this URL appears legitimate';
-    }
-
-    pct.textContent = score + '%';
-
-    // Animate bar after small delay
-    setTimeout(() => {
-      fill.className    = 'risk-bar-fill ' + fillClass;
-      fill.style.width  = score + '%';
-    }, 100);
-
-    // ── XAI explanation list ──
-    // Prefer the SHAP explanation returned by the Flask backend.
-    // Keep the old client-side explanation as a fallback if XAI data is unavailable.
-    if (Array.isArray(explanation) && explanation.length > 0) {
-      document.getElementById('reasonsList').innerHTML = explanation.map(item => {
-        const shapValue = Number(item.impact) || 0;
-        const positive = shapValue >= 0;
-        const direction = positive ? 'TOWARD PHISHING' : 'AWAY FROM PHISHING';
-        const icon = positive ? '🔴' : '🟢';
-        const impactClass = positive ? 'positive' : 'negative';
-        const itemClass = positive ? 'xai-positive' : 'xai-negative';
-
-        return `
-          <li class="reason-item ${itemClass}">
-            <span class="reason-icon">${icon}</span>
-            <span>
-              <strong>${item.feature}</strong> — ${item.reason}
-            </span>
-            <span class="xai-impact ${impactClass}">
-              ${direction} ${shapValue >= 0 ? '+' : ''}${shapValue.toFixed(4)}
-            </span>
-          </li>`;
-      }).join('');
-    } else {
-      const reasons = buildReasons(features, url, isPhishing);
-      document.getElementById('reasonsList').innerHTML = reasons.map(r =>
-        `<li class="reason-item">
-          <span class="reason-icon">${r.icon}</span>
-          <span>${r.text}</span>
-          <span class="reason-weight ${r.weight}">${r.weight.toUpperCase()}</span>
-        </li>`
-      ).join('');
-    }
-
-    // ── Feature bars ──
-    document.getElementById('featureRows').innerHTML = buildFeatureBars(features);
-
-    showPage('result');
-  }
+document.getElementById("urlInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter") checkURL();
+});
+showPage("home");
 </script>
 </body>
 </html>
