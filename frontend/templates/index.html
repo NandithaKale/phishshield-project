@@ -522,6 +522,47 @@
   .reason-weight.med  { color: var(--warn);    background: rgba(255,184,0,0.08);  border: 1px solid rgba(255,184,0,0.2); }
   .reason-weight.low  { color: var(--safe);    background: rgba(0,230,118,0.08);  border: 1px solid rgba(0,230,118,0.25); }
 
+  /* XAI contribution display */
+  .reason-item.xai-positive {
+    border-left: 2px solid var(--accent2);
+    padding-left: 10px;
+  }
+
+  .reason-item.xai-negative {
+    border-left: 2px solid var(--safe);
+    padding-left: 10px;
+  }
+
+  .xai-impact {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .xai-impact.positive {
+    color: var(--accent2);
+    background: rgba(255,60,92,0.08);
+    border: 1px solid rgba(255,60,92,0.2);
+  }
+
+  .xai-impact.negative {
+    color: var(--safe);
+    background: rgba(0,230,118,0.08);
+    border: 1px solid rgba(0,230,118,0.25);
+  }
+
+  .xai-note {
+    padding: 0 28px 18px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    line-height: 1.6;
+  }
+
   /* feature scores */
   .features-card {
     width: 100%;
@@ -826,13 +867,6 @@
 </style>
 </head>
 <body>
-<<<<<<< HEAD
-<li><a href="#" onclick="showPage('home'); return false;" id="nav-home">Home</a></li>
-<li><a href="#" onclick="showPage('result'); return false;" id="nav-result">Result</a></li>
-<li><a href="#" onclick="showPage('about'); return false;" id="nav-about">About</a></li>
-=======
-
->>>>>>> 5a237d0c34a9f34c3d08c36b082b5b7933b0a576
 <nav>
   <div class="logo" onclick="showPage('home')">
     <svg viewBox="0 0 28 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -842,9 +876,9 @@
     PHISH<span style="color:#fff">SHIELD</span>
   </div>
   <ul>
-    <li><a href="#home">Home</a></li>
-<li><a href="#result">Result</a></li>
-<li><a href="#about">About</a></li>
+    <li><a href="#home" onclick="showPage('home'); return false;" id="nav-home">Home</a></li>
+<li><a href="#result" onclick="showPage('result'); return false;" id="nav-result">Result</a></li>
+<li><a href="#about" onclick="showPage('about'); return false;" id="nav-about">About</a></li>
   </ul>
 </nav>
 
@@ -944,8 +978,12 @@
   </div>
 
   <div class="reasons-card">
-    <div class="card-head">🧠 Why was this flagged? — Feature Analysis</div>
+    <div class="card-head">🧠 Why was this flagged? — XAI Feature Analysis</div>
     <ul class="reasons-list" id="reasonsList"></ul>
+    <div class="xai-note">
+      SHAP shows how each top feature contributed to the model's prediction.
+      Positive values push the prediction toward phishing; negative values push it away from phishing.
+    </div>
   </div>
 
   <div class="features-card">
@@ -1187,11 +1225,12 @@
 
     const isPhishing = data.is_phishing;
     const confidence = data.confidence;
+    const explanation = Array.isArray(data.explanation) ? data.explanation : [];
 
     const score = Math.round(confidence * 100);
 
-    // 🔥 render real result
-    renderResult(input, isPhishing, score, confidence);
+    // 🔥 render real result + XAI explanation
+    renderResult(input, isPhishing, score, confidence, explanation);
 
   } catch (error) {
     console.error("Error:", error);
@@ -1201,7 +1240,7 @@
 }
 
   // ── Render result page with real data ──
-  function renderResult(url, isPhishing, score, confidence) {
+  function renderResult(url, isPhishing, score, confidence, explanation) {
     // Extract features client-side (mirrors feature_extractor.py) for display
     const features = extractFeatures(url);
 
@@ -1257,33 +1296,45 @@
       fill.style.width  = score + '%';
     }, 100);
 
-    // ── Reasons list ──
-    const reasons = buildReasons(features, url, isPhishing);
-    document.getElementById('reasonsList').innerHTML = reasons.map(r =>
-      `<li class="reason-item">
-        <span class="reason-icon">${r.icon}</span>
-        <span>${r.text}</span>
-        <span class="reason-weight ${r.weight}">${r.weight.toUpperCase()}</span>
-      </li>`
-    ).join('');
+    // ── XAI explanation list ──
+    // Prefer the SHAP explanation returned by the Flask backend.
+    // Keep the old client-side explanation as a fallback if XAI data is unavailable.
+    if (Array.isArray(explanation) && explanation.length > 0) {
+      document.getElementById('reasonsList').innerHTML = explanation.map(item => {
+        const shapValue = Number(item.impact) || 0;
+        const positive = shapValue >= 0;
+        const direction = positive ? 'TOWARD PHISHING' : 'AWAY FROM PHISHING';
+        const icon = positive ? '🔴' : '🟢';
+        const impactClass = positive ? 'positive' : 'negative';
+        const itemClass = positive ? 'xai-positive' : 'xai-negative';
+
+        return `
+          <li class="reason-item ${itemClass}">
+            <span class="reason-icon">${icon}</span>
+            <span>
+              <strong>${item.feature}</strong> — ${item.reason}
+            </span>
+            <span class="xai-impact ${impactClass}">
+              ${direction} ${shapValue >= 0 ? '+' : ''}${shapValue.toFixed(4)}
+            </span>
+          </li>`;
+      }).join('');
+    } else {
+      const reasons = buildReasons(features, url, isPhishing);
+      document.getElementById('reasonsList').innerHTML = reasons.map(r =>
+        `<li class="reason-item">
+          <span class="reason-icon">${r.icon}</span>
+          <span>${r.text}</span>
+          <span class="reason-weight ${r.weight}">${r.weight.toUpperCase()}</span>
+        </li>`
+      ).join('');
+    }
 
     // ── Feature bars ──
     document.getElementById('featureRows').innerHTML = buildFeatureBars(features);
 
     showPage('result');
   }
-
-<<<<<<< HEAD
-=======
-  // Page navigation
-  function showPage(name) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('nav ul li a').forEach(a => a.classList.remove('active'));
-    document.getElementById(name).classList.add('active');
-    document.getElementById('nav-' + name).classList.add('active');
-    window.scrollTo(0, 0);
-  }
->>>>>>> 5a237d0c34a9f34c3d08c36b082b5b7933b0a576
 </script>
 </body>
 </html>
