@@ -377,7 +377,7 @@ function renderResult(url,isPhishing,confidence,explanation){
   document.getElementById("verdictIcon").textContent=phishing?"🚨":"🛡️";
   document.getElementById("verdictLabel").textContent=phishing?"PHISHING DETECTED":"LIKELY SAFE";
   document.getElementById("verdictSub").textContent=phishing?"High model confidence — avoid visiting this URL.":"The model did not classify this URL as phishing.";
-  document.getElementById("riskPct").textContent=pct+"%";
+  document.getElementById("riskPct").textContent=(confidence*100).toFixed(2)+"%";
   bar.className="risk-bar-fill "+(phishing?"phishing-fill":"safe-fill");
   requestAnimationFrame(()=>bar.style.width=pct+"%");
   urlLen.textContent=features.url_length+" chars";
