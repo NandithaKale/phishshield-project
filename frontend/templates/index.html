@@ -1230,6 +1230,7 @@
         if (errorData.error) message = errorData.error;
       } catch (_) {}
       throw new Error(message);
+    }
 
     const data = await response.json();
 
