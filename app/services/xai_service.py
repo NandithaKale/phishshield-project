@@ -3,6 +3,7 @@ import numpy as np
 
 from app.services.ml_model import load_model
 from shared.feature_extractor import extract_features
+from shared.url_normalizer import normalize_url
 
 
 FEATURE_NAMES = [
@@ -22,7 +23,9 @@ FEATURE_NAMES = [
     "Hyphen in domain",
     "Digit in domain",
     "Domain length",
-    "URL length > 60"
+    "URL length > 60",
+    "Direct IP address",
+    "Look-alike domain"
 ]
 
 
@@ -119,6 +122,16 @@ def get_feature_reason(feature, value):
             return "The URL exceeds 60 characters."
         return "The URL does not exceed 60 characters."
 
+    if feature == "Direct IP address":
+        if value == 1:
+            return "The hostname is a direct IP address."
+        return "The hostname is a domain name."
+
+    if feature == "Look-alike domain":
+        if value == 1:
+            return "The domain closely resembles a trusted domain."
+        return "No look-alike domain match was detected."
+
     return "This feature contributed to the model's prediction."
 
 
@@ -138,6 +151,7 @@ def get_explainer():
 
 def explain_url(url, top_n=5):
     model = load_model()
+    url = normalize_url(url)
     features = extract_features(url)
 
     explainer = get_explainer()
@@ -146,12 +160,17 @@ def explain_url(url, top_n=5):
     shap_values = explainer.shap_values(X)
 
     if isinstance(shap_values, list):
-        values = shap_values[1][0]
+        values = np.asarray(shap_values[1])[0]
     else:
-        values = shap_values[0]
-
-        if getattr(values, "ndim", 1) == 2:
-            values = values[:, 1]
+        values = np.asarray(shap_values)
+        if values.ndim == 3:
+            # Newer SHAP versions may return
+            # (samples, features, outputs).
+            values = values[0, :, 1]
+        elif values.ndim == 2:
+            values = values[0]
+        else:
+            values = values.reshape(-1)
 
     feature_impacts = []
 
@@ -185,7 +204,8 @@ def explain_url(url, top_n=5):
             "reason": get_feature_reason(
                 item["feature"],
                 item["value"]
-            )
+            ),
+            "source": "shap"
         })
 
     return explanations

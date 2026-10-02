@@ -1,9 +1,21 @@
 from urllib.parse import urlparse
 
+from shared.url_normalizer import normalize_url
+from app.services.security_checks import analyze_url_security
+
+
 def extract_features(url):
-    url = url.lower()
+    """
+    Extract the model features from the same normalized URL used by the
+    backend security layer.
+
+    The final two features are deterministic security signals:
+      18. direct IP address
+      19. look-alike domain
+    """
+    url = normalize_url(url).lower()
     parsed = urlparse(url)
-    domain = parsed.netloc
+    domain = parsed.hostname or ""
 
     suspicious_words = [
         "login", "secure", "verify", "account",
@@ -15,6 +27,8 @@ def extract_features(url):
         ".xyz", ".tk", ".ml", ".ga", ".cf",
         ".gq", ".top", ".biz", ".info"
     ]
+
+    security = analyze_url_security(url)
 
     return [
         len(url),
@@ -41,4 +55,7 @@ def extract_features(url):
         len(domain),
 
         int(len(url) > 60),
+
+        int(security["is_ip_address"]),
+        int(security["lookalike_domain"]["is_lookalike"]),
     ]

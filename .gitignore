@@ -6,4 +6,6 @@ __pycache__/
 ml_model/saved_model/
 *.pkl
 
-app/data.db
+app/data.dbinstance/data.db
+
+instance/

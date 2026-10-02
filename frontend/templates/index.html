@@ -323,10 +323,10 @@ function escapeHtml(value){
   return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 }
 
-function renderFeatureRows(features){
+function renderFeatureRows(features,securityAnalysis){
   const danger=new Set(["has_suspicious_word","has_suspicious_tld","has_http_only","has_at_symbol","deep_subdomain","has_dash_in_domain","domain_has_digits","is_long_url","suspicious_word_count"]);
   const warning=new Set(["url_length","dash_count","digit_count","equals_count","dot_count"]);
-  document.getElementById("featureRows").innerHTML=FEATURE_META.map(([key,label,max])=>{
+  const rows=FEATURE_META.map(([key,label,max])=>{
     const raw=Number(features[key])||0;
     const pct=Math.min(100,Math.round((raw/max)*100));
     const cls=danger.has(key)&&raw>0?"danger":warning.has(key)&&pct>40?"warning":"normal";
@@ -337,39 +337,59 @@ function renderFeatureRows(features){
       <span class="feature-val ${cls}">${display}</span>
     </div>`;
   }).join("");
+
+  const sec=securityAnalysis||{};
+  const ip=Boolean(sec.is_ip_address);
+  const look=Boolean(sec.lookalike_domain&&sec.lookalike_domain.is_lookalike);
+  const securityRows=`
+    <div class="feature-row">
+      <span class="feature-name">Direct IP address</span>
+      <div class="feature-bar-track"><div class="feature-bar-fill ${ip?"danger":"normal"}" style="width:${ip?100:0}%"></div></div>
+      <span class="feature-val ${ip?"danger":"normal"}">${ip?"YES":"NO"}</span>
+    </div>
+    <div class="feature-row">
+      <span class="feature-name">Look-alike domain</span>
+      <div class="feature-bar-track"><div class="feature-bar-fill ${look?"danger":"normal"}" style="width:${look?100:0}%"></div></div>
+      <span class="feature-val ${look?"danger":"normal"}">${look?"YES":"NO"}</span>
+    </div>`;
+
+  document.getElementById("featureRows").innerHTML=rows+securityRows;
 }
 
 function renderXAI(explanation){
   const list=document.getElementById("reasonsList");
   if(!Array.isArray(explanation)||explanation.length===0){
-    list.innerHTML=`<li class="reason-item"><span class="reason-icon">⚠️</span><span class="reason-main">The backend did not return a SHAP explanation for this prediction.</span></li>`;
+    list.innerHTML=`<li class="reason-item"><span class="reason-icon">⚠️</span><span class="reason-main">No explanation was returned by the backend.</span></li>`;
     return;
   }
   list.innerHTML=explanation.map(item=>{
+    const source=item.source||"shap";
     const value=Number(item.impact)||0;
-    const positive=value>=0;
-    const icon=positive?"🔴":"🟢";
-    const direction=positive?"TOWARD PHISHING":"AWAY FROM PHISHING";
-    const cls=positive?"reason-positive":"reason-negative";
+    const positive=value>0;
+    const icon=source==="security"?"🛡️":(positive?"🔴":"🟢");
+    const label=source==="security"?"SECURITY RULE":(positive?"TOWARD PHISHING":"AWAY FROM PHISHING");
+    const cls=source==="security"?"reason-positive":(positive?"reason-positive":"reason-negative");
     const impactClass=positive?"positive":"negative";
     return `<li class="reason-item ${cls}">
       <span class="reason-icon">${icon}</span>
-      <span class="reason-main"><strong>${escapeHtml(item.feature||"Feature")}</strong> — ${escapeHtml(item.reason||"Feature contribution returned by SHAP.")}</span>
-      <span class="xai-impact ${impactClass}">${direction} ${value>=0?"+":""}${value.toFixed(4)}</span>
+      <span class="reason-main"><strong>${escapeHtml(item.feature||"Feature")}</strong> — ${escapeHtml(item.reason||"Explanation returned by backend.")}</span>
+      <span class="xai-impact ${impactClass}">${label}${source==="security"?"":" "+(value>=0?"+":"")+value.toFixed(4)}</span>
     </li>`;
   }).join("");
 }
 
-function renderResult(url,isPhishing,confidence,explanation){
-  const features=extractFeatures(url);
-  const pct=Math.round(Math.max(0,Math.min(1,Number(confidence)||0))*100);
+function renderResult(url,isPhishing,confidence,explanation,securityAnalysis,normalizedUrl){
+  const features=extractFeatures(normalizedUrl||url);
+  const safeConfidence=Number(confidence)||0;
+  const phishing=Boolean(isPhishing);
+  const risk=safeConfidence===0 ? 0 : (phishing?safeConfidence:1-safeConfidence);
+  const pct=Math.round(Math.max(0,Math.min(1,risk))*100);
   const card=document.getElementById("verdictCard");
   const bar=document.getElementById("riskBarFill");
   const https=document.getElementById("httpsVal");
   const urlLen=document.getElementById("urlLen");
 
   card.classList.remove("phishing","safe","warning");
-  const phishing=Boolean(isPhishing);
   const classification=phishing?"phishing":"safe";
   card.classList.add(classification);
 
@@ -377,7 +397,7 @@ function renderResult(url,isPhishing,confidence,explanation){
   document.getElementById("verdictIcon").textContent=phishing?"🚨":"🛡️";
   document.getElementById("verdictLabel").textContent=phishing?"PHISHING DETECTED":"LIKELY SAFE";
   document.getElementById("verdictSub").textContent=phishing?"High model confidence — avoid visiting this URL.":"The model did not classify this URL as phishing.";
-  document.getElementById("riskPct").textContent=(confidence*100).toFixed(2)+"%";
+  document.getElementById("riskPct").textContent=(risk*100).toFixed(2)+"%";
   bar.className="risk-bar-fill "+(phishing?"phishing-fill":"safe-fill");
   requestAnimationFrame(()=>bar.style.width=pct+"%");
   urlLen.textContent=features.url_length+" chars";
@@ -386,7 +406,7 @@ function renderResult(url,isPhishing,confidence,explanation){
   https.className="detail-val "+(features.has_https?"ok":"bad");
 
   renderXAI(explanation);
-  renderFeatureRows(features);
+  renderFeatureRows(features,securityAnalysis);
   document.getElementById("emptyResult").style.display="none";
 }
 
@@ -429,7 +449,7 @@ async function checkURL(){
     }
 
     lastResult=data;
-    renderResult(url,data.is_phishing,data.confidence,data.explanation);
+    renderResult(url,data.is_phishing,data.confidence,data.explanation,data.security_analysis,data.normalized_url);
     showPage("result");
   }catch(err){
     console.error("PhishShield API error:",err);
