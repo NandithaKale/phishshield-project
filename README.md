@@ -312,6 +312,61 @@ python backend/app.py
 
 ---
 
+
+## 🛡️ Security Layer & Backend Enhancement
+
+The URL prediction pipeline now performs security analysis before the final verdict:
+
+1. **URL normalization** — trims input, adds `https://` when no scheme is supplied, canonicalizes the hostname, converts internationalized hostnames to IDNA/punycode, and removes URL fragments.
+2. **IP-address detection** — identifies IPv4/IPv6 hostnames and exposes the result as a deterministic security signal.
+3. **Look-alike domain detection** — compares the normalized domain against a configurable trusted-domain list and detects common substitutions such as `paypa1.com` and `g00gle.com`.
+4. **ML prediction** — Random Forest continues to provide the learned phishing probability.
+5. **SHAP explanation** — SHAP explains the ML feature contribution using the enhanced 19-feature vector.
+6. **Final decision layer** — combines the ML probability with deterministic security rules. Look-alike domains can trigger a phishing override; IP addresses raise the review sensitivity without automatically declaring every IP-hosted URL malicious.
+7. **Evaluation** — `ml_model/src/evaluate_baseline_vs_enhanced.py` trains the original 17-feature baseline and the enhanced 19-feature model on the same split and reports Accuracy, Precision, Recall, F1, and the confusion matrix.
+
+### New/updated backend files
+
+- `shared/url_normalizer.py`
+- `app/services/security_checks.py`
+- `shared/feature_extractor.py`
+- `app/services/predict_service.py`
+- `app/services/xai_service.py`
+- `app/routes/predict_routes.py`
+- `ml_model/src/train_url_model.py`
+- `ml_model/src/evaluate_baseline_vs_enhanced.py`
+- `test_security_checks.py`
+
+### Important model note
+
+The enhanced feature extractor changes the URL feature vector from **17 to 19 features**. The existing saved model must therefore be retrained before the updated `/predict` endpoint is used. The backend explicitly checks the saved model's `n_features_in_` and returns a clear error if an old 17-feature model is still present.
+
+### Testing
+
+Run:
+
+```bash
+python test_security_checks.py
+```
+
+Then compare the models:
+
+```bash
+python ml_model/src/evaluate_baseline_vs_enhanced.py
+```
+
+For a faster development check:
+
+```bash
+python ml_model/src/evaluate_baseline_vs_enhanced.py --sample 50000
+```
+
+Finally train/save the enhanced model:
+
+```bash
+python ml_model/src/train_url_model.py
+```
+
 ## 🏆 Conclusion
 
 PhishShield is a scalable and modular phishing detection system combining machine learning, explainability, and real-time browser integration.
