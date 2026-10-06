@@ -8,6 +8,7 @@ document.addEventListener("click", function (event) {
 
     const url = link.href;
 
+    // Only check HTTP/HTTPS links
     if (
         !url.startsWith("http://") &&
         !url.startsWith("https://")
@@ -15,6 +16,7 @@ document.addEventListener("click", function (event) {
         return;
     }
 
+    // Stop the browser from navigating immediately
     event.preventDefault();
     event.stopPropagation();
 
@@ -25,31 +27,44 @@ document.addEventListener("click", function (event) {
         },
         function (response) {
 
+            // Extension communication error
             if (chrome.runtime.lastError) {
+
                 console.error(
                     "PhishShield extension error:",
                     chrome.runtime.lastError.message
                 );
 
+                // If checking fails, allow normal navigation
                 window.location.href = url;
                 return;
             }
 
+            // Backend/checking failed
             if (!response || !response.success) {
+
                 console.error(
                     "PhishShield could not check URL:",
-                    response ? response.error : "No response"
+                    response
+                        ? response.error
+                        : "No response"
                 );
 
+                // If checking fails, allow normal navigation
                 window.location.href = url;
                 return;
             }
 
             const data = response.data;
 
+            // Phishing detected
             if (data.is_phishing) {
+
                 showWarning(url, data);
+
             } else {
+
+                // Safe URL → continue normally
                 window.location.href = url;
             }
         }
@@ -59,6 +74,14 @@ document.addEventListener("click", function (event) {
 
 function showWarning(url, data) {
 
+    // Remove an existing warning if there is one
+    const existingWarning =
+        document.getElementById("phishshield-warning");
+
+    if (existingWarning) {
+        existingWarning.remove();
+    }
+
     const overlay = document.createElement("div");
 
     overlay.id = "phishshield-warning";
@@ -66,6 +89,11 @@ function showWarning(url, data) {
     const explanations = data.explanation || [];
 
     let xaiHTML = "";
+
+
+    // -----------------------------
+    // XAI EXPLANATIONS
+    // -----------------------------
 
     if (explanations.length > 0) {
 
@@ -136,6 +164,10 @@ function showWarning(url, data) {
     }
 
 
+    // -----------------------------
+    // WARNING UI
+    // -----------------------------
+
     overlay.innerHTML = `
 
         <div style="
@@ -160,8 +192,11 @@ function showWarning(url, data) {
                 border: 2px solid #dc2626;
                 border-radius: 16px;
                 text-align: center;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+                box-shadow:
+                    0 20px 60px rgba(0,0,0,0.5);
             ">
+
+                <!-- Warning icon -->
 
                 <div style="
                     font-size: 46px;
@@ -170,6 +205,8 @@ function showWarning(url, data) {
                     🚨
                 </div>
 
+
+                <!-- Title -->
 
                 <h1 style="
                     margin: 0 0 10px;
@@ -180,16 +217,20 @@ function showWarning(url, data) {
                 </h1>
 
 
+                <!-- Description -->
+
                 <p style="
                     color: #aeb9cf;
                     font-size: 14px;
                     line-height: 1.6;
                     margin-bottom: 18px;
                 ">
-                    PhishShield has detected suspicious characteristics
-                    in this URL.
+                    PhishShield has detected suspicious
+                    characteristics in this URL.
                 </p>
 
+
+                <!-- Suspicious URL -->
 
                 <div style="
                     margin: 18px 0;
@@ -206,6 +247,8 @@ function showWarning(url, data) {
                 </div>
 
 
+                <!-- Confidence -->
+
                 <div style="
                     font-size: 18px;
                     font-weight: bold;
@@ -215,6 +258,8 @@ function showWarning(url, data) {
                     ${(Number(data.confidence) * 100).toFixed(2)}%
                 </div>
 
+
+                <!-- XAI -->
 
                 <div style="
                     text-align: left;
@@ -235,31 +280,41 @@ function showWarning(url, data) {
                 </div>
 
 
+                <!-- BUTTONS -->
+
                 <div>
 
-                    <button id="phishshield-back" style="
-                        padding: 12px 22px;
-                        margin-right: 8px;
-                        border: none;
-                        border-radius: 8px;
-                        background: #2563eb;
-                        color: white;
-                        font-weight: bold;
-                        cursor: pointer;
-                    ">
+                    <button
+                        id="phishshield-back"
+                        type="button"
+                        style="
+                            padding: 12px 22px;
+                            margin-right: 8px;
+                            border: none;
+                            border-radius: 8px;
+                            background: #2563eb;
+                            color: white;
+                            font-weight: bold;
+                            cursor: pointer;
+                        "
+                    >
                         ← Go Back
                     </button>
 
 
-                    <button id="phishshield-continue" style="
-                        padding: 12px 22px;
-                        border: 1px solid #475569;
-                        border-radius: 8px;
-                        background: transparent;
-                        color: #cbd5e1;
-                        font-weight: bold;
-                        cursor: pointer;
-                    ">
+                    <button
+                        id="phishshield-continue"
+                        type="button"
+                        style="
+                            padding: 12px 22px;
+                            border: 1px solid #475569;
+                            border-radius: 8px;
+                            background: transparent;
+                            color: #cbd5e1;
+                            font-weight: bold;
+                            cursor: pointer;
+                        "
+                    >
                         Continue Anyway
                     </button>
 
@@ -274,18 +329,42 @@ function showWarning(url, data) {
     document.documentElement.appendChild(overlay);
 
 
-    document.getElementById("phishshield-back")
+    // -----------------------------
+    // GO BACK BUTTON
+    // -----------------------------
+
+    document
+        .getElementById("phishshield-back")
         .addEventListener("click", function () {
-            window.history.back();
+
+            // IMPORTANT:
+            // Do NOT use window.history.back().
+            //
+            // The suspicious navigation was already blocked.
+            // Removing the warning keeps the user safely
+            // on the current page.
+
+            overlay.remove();
         });
 
 
-    document.getElementById("phishshield-continue")
+    // -----------------------------
+    // CONTINUE ANYWAY BUTTON
+    // -----------------------------
+
+    document
+        .getElementById("phishshield-continue")
         .addEventListener("click", function () {
+
+            // User explicitly chooses to continue
             window.location.href = url;
         });
 }
 
+
+// -----------------------------
+// HTML ESCAPING
+// -----------------------------
 
 function escapeHtml(value) {
 
