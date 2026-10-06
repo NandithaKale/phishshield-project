@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishShield</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <div class="logo">🛡️</div>
+            <div>
+                <h1>PhishShield</h1>
+                <p>AI-Powered URL Protection</p>
+            </div>
+        </header>
+
+        <div class="url-section">
+            <div class="section-label">CURRENT WEBSITE</div>
+
+            <div id="currentUrl" class="current-url">
+                Reading URL...
+            </div>
+        </div>
+
+        <button id="checkButton">
+            🔍 Check Website
+        </button>
+
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <span>Analyzing URL...</span>
+        </div>
+
+        <div id="errorBox" class="error hidden"></div>
+
+        <div id="result" class="result hidden">
+
+            <div id="verdictCard" class="verdict-card">
+
+                <div id="verdictIcon" class="verdict-icon">🛡️</div>
+
+                <div id="verdictLabel" class="verdict-label">
+                    LIKELY SAFE
+                </div>
+
+                <div id="confidence" class="confidence">
+                    Confidence: —
+                </div>
+
+            </div>
+
+            <div class="xai-section">
+
+                <div class="section-title">
+                    🧠 Why this classification?
+                </div>
+
+                <div id="explanations"></div>
+
+            </div>
+
+        </div>
+
+        <footer>
+            PhishShield • ML + Explainable AI
+        </footer>
+
+    </div>
+
+    <script src="popup.js"></script>
+
+</body>
+</html>

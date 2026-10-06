@@ -1,169 +1,413 @@
-import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+import sys
 
+import joblib
+import numpy as np
 import pandas as pd
-import pickle
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+)
 from sklearn.model_selection import train_test_split
 from sklearn.utils import resample
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+
+sys.path.append(
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "../../"
+        )
+    )
+)
 
 from shared.feature_extractor import extract_features
 
-# =========================
-# LOAD DATA
-# =========================
-data = pd.read_csv("ml_model/dataset/phishing.csv", encoding='latin1')
-data = data.dropna()
 
-# =========================
-# FIX LABELS
-# =========================
-data['Label'] = data['Label'].astype(str).str.lower()
-data['Label'] = data['Label'].map({'good': 0, 'bad': 1})
-data = data.dropna(subset=['Label'])
-data['Label'] = data['Label'].astype(int)
+# ==========================================================
+# LOAD DATASET
+# ==========================================================
 
-print("\nLabel Count:\n", data['Label'].value_counts())
+data = pd.read_csv(
+    "ml_model/dataset/phishing.csv",
+    encoding="latin1",
+).dropna(subset=["URL", "Label"])
 
-# =========================
+
+# ==========================================================
+# CONVERT LABELS
+# ==========================================================
+
+data["Label"] = (
+    data["Label"]
+    .astype(str)
+    .str.lower()
+    .map({
+        "good": 0,
+        "bad": 1,
+    })
+)
+
+data = data.dropna(
+    subset=["Label"]
+)
+
+data["Label"] = data["Label"].astype(int)
+
+
+# ==========================================================
+# ORIGINAL LABEL COUNTS
+# ==========================================================
+
+print("\nOriginal label counts:")
+print(data["Label"].value_counts())
+
+
+# ==========================================================
 # BALANCE DATASET
-# =========================
-df_good = data[data['Label'] == 0]
-df_bad = data[data['Label'] == 1]
+# ==========================================================
+
+df_good = data[
+    data["Label"] == 0
+]
+
+df_bad = data[
+    data["Label"] == 1
+]
 
 df_bad_upsampled = resample(
     df_bad,
     replace=True,
     n_samples=len(df_good),
-    random_state=42
+    random_state=42,
 )
 
-data = pd.concat([df_good, df_bad_upsampled])
+data = pd.concat(
+    [
+        df_good,
+        df_bad_upsampled,
+    ],
+    ignore_index=True,
+)
 
-# =========================
-# FEATURES
-# =========================
+
+print("\nBalanced label counts:")
+print(data["Label"].value_counts())
+
+
+# ==========================================================
+# VALIDATE URLS
+# ==========================================================
+#
+# The enhanced extractor now performs URL normalization.
+# Some rows in the dataset may contain malformed URLs.
+#
+# We remove only URLs that cannot be processed while keeping
+# their corresponding labels together.
+# ==========================================================
+
+print("\nValidating URLs...")
+
+valid_urls = []
+valid_labels = []
+
+invalid_count = 0
+
+for index, row in data.iterrows():
+
+    url = str(row["URL"])
+    label = int(row["Label"])
+
+    try:
+
+        # Test whether the enhanced extractor can process
+        # this URL successfully.
+        extract_features(url)
+
+        valid_urls.append(url)
+        valid_labels.append(label)
+
+    except (
+        ValueError,
+        TypeError,
+        AttributeError,
+    ) as e:
+
+        invalid_count += 1
+
+        # Print only the first 20 invalid URLs.
+        if invalid_count <= 20:
+
+            print(
+                f"\nInvalid URL at index {index}:"
+            )
+
+            print(
+                f"URL: {repr(url)}"
+            )
+
+            print(
+                f"Reason: {e}"
+            )
+
+
+print("\nURL validation complete.")
+
+print(
+    "Valid URLs:",
+    len(valid_urls)
+)
+
+print(
+    "Invalid URLs removed:",
+    invalid_count
+)
+
+
+# ==========================================================
+# REBUILD CLEAN DATA
+# ==========================================================
+
+if len(valid_urls) == 0:
+    raise ValueError(
+        "No valid URLs remain after URL validation."
+    )
+
+
+data = pd.DataFrame({
+    "URL": valid_urls,
+    "Label": valid_labels,
+})
+
+
+# Make sure both classes still exist.
+
+if data["Label"].nunique() < 2:
+    raise ValueError(
+        "Only one class remains after URL validation."
+    )
+
+
+# ==========================================================
+# EXTRACT ENHANCED FEATURES
+# ==========================================================
+#
+# IMPORTANT:
+# The enhanced extractor produces 19 features:
+#
+# Original 17
+# +
+# Direct IP
+# +
+# Look-alike domain
+# ==========================================================
+
+print("\nExtracting enhanced features...")
+
 X = []
-y = data['Label']
 
-for url in data['URL']:
-    X.append(extract_features(str(url)))
+for index, url in enumerate(data["URL"]):
 
+    features = extract_features(
+        str(url)
+    )
+
+    X.append(features)
+
+    if (
+        (index + 1) % 10000 == 0
+        or index + 1 == len(data)
+    ):
+
+        print(
+            f"Processed "
+            f"{index + 1}/"
+            f"{len(data)} URLs"
+        )
+
+
+# Convert to NumPy array.
+
+X = np.asarray(
+    X,
+    dtype=float,
+)
+
+
+y = data[
+    "Label"
+].to_numpy(
+    dtype=int
+)
+
+
+# ==========================================================
+# VERIFY FEATURE COUNT
+# ==========================================================
+
+print(
+    "\nFeature matrix shape:",
+    X.shape
+)
+
+if X.shape[1] != 19:
+
+    raise ValueError(
+        f"Expected 19 features, "
+        f"but received {X.shape[1]} features."
+    )
+
+print(
+    "Feature count confirmed:",
+    X.shape[1]
+)
+
+
+# ==========================================================
+# TRAIN / TEST SPLIT
+# ==========================================================
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, stratify=y, random_state=42
+    X,
+    y,
+    test_size=0.20,
+    stratify=y,
+    random_state=42,
 )
 
+
+print(
+    "\nTraining samples:",
+    len(X_train)
+)
+
+print(
+    "Testing samples:",
+    len(X_test)
+)
+
+
+# ==========================================================
+# RANDOM FOREST MODEL
+# ==========================================================
 
 model = RandomForestClassifier(
     n_estimators=500,
     max_depth=25,
     min_samples_split=3,
     min_samples_leaf=1,
-    class_weight='balanced',
+    class_weight="balanced",
     random_state=42,
-    n_jobs=-1
+    n_jobs=-1,
 )
 
-model.fit(X_train, y_train)
 
-accuracy = model.score(X_test, y_test)
+# ==========================================================
+# TRAIN MODEL
+# ==========================================================
 
+print(
+    "\nTraining enhanced Random Forest model..."
+)
+
+model.fit(
+    X_train,
+    y_train,
+)
+
+
+# ==========================================================
+# PREDICTIONS
+# ==========================================================
+
+predictions = model.predict(
+    X_test
+)
+
+
+# ==========================================================
+# EVALUATION
+# ==========================================================
+
+print(
+    "\n=== Enhanced Model Evaluation ==="
+)
+
+print(
+    "Accuracy :",
+    round(
+        accuracy_score(
+            y_test,
+            predictions,
+        ),
+        4,
+    ),
+)
+
+print(
+    "Precision:",
+    round(
+        precision_score(
+            y_test,
+            predictions,
+            zero_division=0,
+        ),
+        4,
+    ),
+)
+
+print(
+    "Recall   :",
+    round(
+        recall_score(
+            y_test,
+            predictions,
+            zero_division=0,
+        ),
+        4,
+    ),
+)
+
+print(
+    "F1 Score :",
+    round(
+        f1_score(
+            y_test,
+            predictions,
+            zero_division=0,
+        ),
+        4,
+    ),
+)
+
+
+# ==========================================================
 # SAVE MODEL
-#pickle.dump(model, open("ml_model/saved_model/url_model.pkl", "wb"))
-import os
+# ==========================================================
 
-save_path = "ml_model/saved_model/url_model.pkl"
+save_path = (
+    "ml_model/saved_model/url_model.pkl"
+)
 
-# Create folder if it doesn't exist
-os.makedirs(os.path.dirname(save_path), exist_ok=True)
+os.makedirs(
+    os.path.dirname(save_path),
+    exist_ok=True,
+)
 
-# Save model
-with open(save_path, "wb") as f:
-    pickle.dump(model, f)
-# =========================
-# PREDICTION FUNCTION
-# =========================
-def predict_url_with_risk(url):
-    features = extract_features(url)
-    proba = model.predict_proba([features])[0]
-
-    phishing_prob = proba[1] * 100
-
-    if phishing_prob < 60:
-        phishing_prob *= 0.6
-
-    if phishing_prob < 30:
-        label = "Safe"
-    elif phishing_prob < 70:
-        label = "Moderate Risk"
-    else:
-        label = "Phishing"
-
-    return label, round(phishing_prob, 2)
-
-# =========================
-# TEST URLS
-# =========================
-test_urls = [
-# SAFE (15)
-
-"https://www.paypal.com",
-"https://www.ibm.com",
+joblib.dump(
+    model,
+    save_path,
+)
 
 
-# PHISHING (15)
-"http://secure-login-paypal.xyz/verify",
-"http://account-update-bank.ru/login",
+print(
+    f"\nEnhanced model saved to: {save_path}"
+)
 
-]
-
-# ACTUAL LABELS
-actual_labels = [0]*15 + [1]*15
-
-predicted_labels = []
-results_table = []
-
-print("\nModel Accuracy:", round(accuracy, 4))
-print("\n--- Testing Results ---")
-
-for i, url in enumerate(test_urls):
-    label, confidence = predict_url_with_risk(url)
-
-    pred = 1 if label == "Phishing" else 0
-    predicted_labels.append(pred)
-
-    actual = actual_labels[i]
-
-    results_table.append({
-        "URL": url,
-        "Actual": "Phishing" if actual == 1 else "Safe",
-        "Predicted": label,
-        "Confidence (%)": confidence
-    })
-
-    print(url, "→", label, f"({confidence}%)")
-
-# =========================
-# TABLE
-# =========================
-df_results = pd.DataFrame(results_table)
-
-print("\n--- Comparison Table ---")
-print(df_results)
-
-# =========================
-# METRICS
-# =========================
-accuracy = accuracy_score(actual_labels, predicted_labels)
-precision = precision_score(actual_labels, predicted_labels)
-recall = recall_score(actual_labels, predicted_labels)
-f1 = f1_score(actual_labels, predicted_labels)
-
-print("\n--- Evaluation Metrics ---")
-print("Accuracy :", round(accuracy, 4))
-print("Precision:", round(precision, 4))
-print("Recall   :", round(recall, 4))
-print("F1 Score :", round(f1, 4))
+print(
+    "Feature count:",
+    model.n_features_in_,
+)
