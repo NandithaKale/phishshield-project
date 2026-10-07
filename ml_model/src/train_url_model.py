@@ -4,7 +4,6 @@ import sys
 import joblib
 import numpy as np
 import pandas as pd
-
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     accuracy_score,
@@ -15,10 +14,6 @@ from sklearn.metrics import (
 from sklearn.model_selection import train_test_split
 from sklearn.utils import resample
 
-
-# ==========================================================
-# ADD PROJECT ROOT TO PATH
-# ==========================================================
 
 sys.path.append(
     os.path.abspath(
@@ -39,9 +34,7 @@ from shared.feature_extractor import extract_features
 data = pd.read_csv(
     "ml_model/dataset/phishing.csv",
     encoding="latin1",
-).dropna(
-    subset=["URL", "Label"]
-)
+).dropna(subset=["URL", "Label"])
 
 
 # ==========================================================
@@ -69,40 +62,54 @@ data["Label"] = data["Label"].astype(int)
 # ORIGINAL LABEL COUNTS
 # ==========================================================
 
-print("\n" + "=" * 60)
-print("ORIGINAL LABEL DISTRIBUTION")
-print("=" * 60)
+print("\nOriginal label counts:")
+print(data["Label"].value_counts())
 
-print(
-    data["Label"].value_counts()
-    .sort_index()
+
+# ==========================================================
+# BALANCE DATASET
+# ==========================================================
+
+df_good = data[
+    data["Label"] == 0
+]
+
+df_bad = data[
+    data["Label"] == 1
+]
+
+df_bad_upsampled = resample(
+    df_bad,
+    replace=True,
+    n_samples=len(df_good),
+    random_state=42,
 )
 
-print(
-    "\nLabel 0 (Good / Legitimate):",
-    (data["Label"] == 0).sum()
+data = pd.concat(
+    [
+        df_good,
+        df_bad_upsampled,
+    ],
+    ignore_index=True,
 )
 
-print(
-    "Label 1 (Bad / Phishing):",
-    (data["Label"] == 1).sum()
-)
+
+print("\nBalanced label counts:")
+print(data["Label"].value_counts())
 
 
 # ==========================================================
 # VALIDATE URLS
 # ==========================================================
 #
-# The enhanced extractor performs URL normalization.
-# Some rows may contain malformed URLs.
+# The enhanced extractor now performs URL normalization.
+# Some rows in the dataset may contain malformed URLs.
 #
-# Invalid URLs are removed while keeping their labels
-# together.
+# We remove only URLs that cannot be processed while keeping
+# their corresponding labels together.
 # ==========================================================
 
-print("\n" + "=" * 60)
-print("VALIDATING URLs")
-print("=" * 60)
+print("\nValidating URLs...")
 
 valid_urls = []
 valid_labels = []
@@ -116,8 +123,8 @@ for index, row in data.iterrows():
 
     try:
 
-        # Test whether the enhanced extractor
-        # can process this URL.
+        # Test whether the enhanced extractor can process
+        # this URL successfully.
         extract_features(url)
 
         valid_urls.append(url)
@@ -165,7 +172,6 @@ print(
 # ==========================================================
 
 if len(valid_urls) == 0:
-
     raise ValueError(
         "No valid URLs remain after URL validation."
     )
@@ -177,65 +183,33 @@ data = pd.DataFrame({
 })
 
 
-# ==========================================================
-# CLEANED LABEL DISTRIBUTION
-# ==========================================================
-
-print("\n" + "=" * 60)
-print("CLEANED LABEL DISTRIBUTION")
-print("=" * 60)
-
-print(
-    data["Label"].value_counts()
-    .sort_index()
-)
-
-
-# Make sure both classes exist.
+# Make sure both classes still exist.
 
 if data["Label"].nunique() < 2:
-
     raise ValueError(
         "Only one class remains after URL validation."
     )
 
 
 # ==========================================================
-# EXTRACT 19 FEATURES
+# EXTRACT ENHANCED FEATURES
 # ==========================================================
 #
+# IMPORTANT:
 # The enhanced extractor produces 19 features:
 #
-# 1.  URL length
-# 2.  Dot count
-# 3.  Hyphen count
-# 4.  Slash count
-# 5.  Equal sign count
-# 6.  HTTPS indicator
-# 7.  HTTP indicator
-# 8.  @ symbol
-# 9.  Digit count
-# 10. Suspicious word presence
-# 11. Suspicious word count
-# 12. Suspicious TLD
-# 13. Multiple subdomain indicator
-# 14. Hyphen in domain
-# 15. Digit in domain
-# 16. Domain length
-# 17. Long URL indicator
-# 18. Direct IP address
-# 19. Look-alike domain
+# Original 17
+# +
+# Direct IP
+# +
+# Look-alike domain
 # ==========================================================
 
-print("\n" + "=" * 60)
-print("EXTRACTING 19 FEATURES")
-print("=" * 60)
+print("\nExtracting enhanced features...")
 
 X = []
 
-for index, url in enumerate(
-    data["URL"]
-):
+for index, url in enumerate(data["URL"]):
 
     features = extract_features(
         str(url)
@@ -295,20 +269,6 @@ print(
 # ==========================================================
 # TRAIN / TEST SPLIT
 # ==========================================================
-#
-# IMPORTANT:
-#
-# The dataset is split BEFORE oversampling.
-#
-# This prevents duplicated minority-class samples
-# from appearing in both training and testing data.
-#
-# The test set remains completely untouched.
-# ==========================================================
-
-print("\n" + "=" * 60)
-print("TRAIN / TEST SPLIT")
-print("=" * 60)
 
 X_train, X_test, y_train, y_test = train_test_split(
     X,
@@ -320,7 +280,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 
 print(
-    "Training samples before balancing:",
+    "\nTraining samples:",
     len(X_train)
 )
 
@@ -330,219 +290,16 @@ print(
 )
 
 
-print(
-    "\nTraining label distribution before balancing:"
-)
-
-print(
-    pd.Series(y_train)
-    .value_counts()
-    .sort_index()
-)
-
-
-print(
-    "\nTesting label distribution:"
-)
-
-print(
-    pd.Series(y_test)
-    .value_counts()
-    .sort_index()
-)
-
-
-# ==========================================================
-# BALANCE TRAINING DATA ONLY
-# ==========================================================
-#
-# Label 0 = Good / Legitimate
-# Label 1 = Bad / Phishing
-#
-# The minority class is oversampled with replacement
-# until it reaches the size of the majority class.
-#
-# The TEST SET IS NOT BALANCED.
-# ==========================================================
-
-print("\n" + "=" * 60)
-print("BALANCING TRAINING DATA")
-print("=" * 60)
-
-
-# Separate training classes.
-
-X_train_good = X_train[
-    y_train == 0
-]
-
-y_train_good = y_train[
-    y_train == 0
-]
-
-
-X_train_bad = X_train[
-    y_train == 1
-]
-
-y_train_bad = y_train[
-    y_train == 1
-]
-
-
-print(
-    "Training Label 0 before balancing:",
-    len(X_train_good)
-)
-
-print(
-    "Training Label 1 before balancing:",
-    len(X_train_bad)
-)
-
-
-# ----------------------------------------------------------
-# Oversample minority class
-# ----------------------------------------------------------
-#
-# In your dataset, Label 1 (phishing) is the minority class.
-#
-# If this changes in the future, the code below automatically
-# identifies the minority class instead of assuming it.
-# ----------------------------------------------------------
-
-if len(X_train_good) > len(X_train_bad):
-
-    # Label 1 is the minority class.
-
-    X_train_bad_upsampled = resample(
-        X_train_bad,
-        replace=True,
-        n_samples=len(X_train_good),
-        random_state=42,
-    )
-
-    y_train_bad_upsampled = resample(
-        y_train_bad,
-        replace=True,
-        n_samples=len(y_train_good),
-        random_state=42,
-    )
-
-    X_train_balanced = np.vstack(
-        [
-            X_train_good,
-            X_train_bad_upsampled,
-        ]
-    )
-
-    y_train_balanced = np.concatenate(
-        [
-            y_train_good,
-            y_train_bad_upsampled,
-        ]
-    )
-
-
-elif len(X_train_bad) > len(X_train_good):
-
-    # Label 0 is the minority class.
-
-    X_train_good_upsampled = resample(
-        X_train_good,
-        replace=True,
-        n_samples=len(X_train_bad),
-        random_state=42,
-    )
-
-    y_train_good_upsampled = resample(
-        y_train_good,
-        replace=True,
-        n_samples=len(y_train_bad),
-        random_state=42,
-    )
-
-    X_train_balanced = np.vstack(
-        [
-            X_train_good_upsampled,
-            X_train_bad,
-        ]
-    )
-
-    y_train_balanced = np.concatenate(
-        [
-            y_train_good_upsampled,
-            y_train_bad,
-        ]
-    )
-
-
-else:
-
-    # Already balanced.
-
-    X_train_balanced = X_train.copy()
-
-    y_train_balanced = y_train.copy()
-
-
-# ==========================================================
-# SHUFFLE BALANCED TRAINING DATA
-# ==========================================================
-
-shuffle_indices = np.random.RandomState(
-    42
-).permutation(
-    len(X_train_balanced)
-)
-
-X_train_balanced = X_train_balanced[
-    shuffle_indices
-]
-
-y_train_balanced = y_train_balanced[
-    shuffle_indices
-]
-
-
-# ==========================================================
-# PRINT BALANCED DISTRIBUTION
-# ==========================================================
-
-print(
-    "\nTraining label distribution after balancing:"
-)
-
-print(
-    pd.Series(y_train_balanced)
-    .value_counts()
-    .sort_index()
-)
-
-print(
-    "\nBalanced training samples:",
-    len(X_train_balanced)
-)
-
-print(
-    "Testing samples remain untouched:",
-    len(X_test)
-)
-
-
 # ==========================================================
 # RANDOM FOREST MODEL
 # ==========================================================
-
-print("\n" + "=" * 60)
-print("RANDOM FOREST MODEL")
-print("=" * 60)
 
 model = RandomForestClassifier(
     n_estimators=500,
     max_depth=25,
     min_samples_split=3,
     min_samples_leaf=1,
+    class_weight="balanced",
     random_state=42,
     n_jobs=-1,
 )
@@ -557,23 +314,14 @@ print(
 )
 
 model.fit(
-    X_train_balanced,
-    y_train_balanced,
-)
-
-
-print(
-    "Training completed."
+    X_train,
+    y_train,
 )
 
 
 # ==========================================================
 # PREDICTIONS
 # ==========================================================
-
-print(
-    "\nGenerating predictions..."
-)
 
 predictions = model.predict(
     X_test
@@ -584,39 +332,17 @@ predictions = model.predict(
 # EVALUATION
 # ==========================================================
 
-print("\n" + "=" * 60)
-print("ENHANCED RANDOM FOREST MODEL EVALUATION")
-print("=" * 60)
-
-
-accuracy = accuracy_score(
-    y_test,
-    predictions,
+print(
+    "\n=== Enhanced Model Evaluation ==="
 )
-
-precision = precision_score(
-    y_test,
-    predictions,
-    zero_division=0,
-)
-
-recall = recall_score(
-    y_test,
-    predictions,
-    zero_division=0,
-)
-
-f1 = f1_score(
-    y_test,
-    predictions,
-    zero_division=0,
-)
-
 
 print(
     "Accuracy :",
     round(
-        accuracy,
+        accuracy_score(
+            y_test,
+            predictions,
+        ),
         4,
     ),
 )
@@ -624,7 +350,11 @@ print(
 print(
     "Precision:",
     round(
-        precision,
+        precision_score(
+            y_test,
+            predictions,
+            zero_division=0,
+        ),
         4,
     ),
 )
@@ -632,7 +362,11 @@ print(
 print(
     "Recall   :",
     round(
-        recall,
+        recall_score(
+            y_test,
+            predictions,
+            zero_division=0,
+        ),
         4,
     ),
 )
@@ -640,7 +374,11 @@ print(
 print(
     "F1 Score :",
     round(
-        f1,
+        f1_score(
+            y_test,
+            predictions,
+            zero_division=0,
+        ),
         4,
     ),
 )
@@ -659,7 +397,6 @@ os.makedirs(
     exist_ok=True,
 )
 
-
 joblib.dump(
     model,
     save_path,
@@ -674,7 +411,3 @@ print(
     "Feature count:",
     model.n_features_in_,
 )
-
-print("\n" + "=" * 60)
-print("TRAINING COMPLETE")
-print("=" * 60)
