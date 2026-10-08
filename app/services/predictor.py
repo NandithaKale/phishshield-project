@@ -8,7 +8,7 @@ def predict_url(url):
 
     probability = model.predict_proba([features])[0][1]
 
-# 🔥 Better threshold
+
     threshold = 0.7
 
     is_phishing = probability >= threshold
