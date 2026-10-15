@@ -1,26 +1,4 @@
 
-"""
-PhishShield model comparison runner — SEEN TEST ONLY.
-
-Run from repository root:
-    python ml_model/src/run_all_models_seen_unseen.py
-
-Writes:
-    ml_model/final_all_models/seen_test_metrics.csv
-    ml_model/final_all_models/model_status.csv
-    ml_model/final_all_models/phishshield_all_models.xlsx
-
-Evaluation:
-- Internal dataset: good = 0 (legitimate), bad = 1 (phishing).
-- Removes duplicate URLs.
-- Uses a stratified 80/20 train-test split.
-- Uses class balancing where configured.
-- Evaluates models on the held-out 20% test split.
-- Does NOT load external datasets or perform unseen-data evaluation.
-- GNN, Vision Transformer and Multimodal Fusion are marked NOT RUN
-  because their required input data is unavailable.
-"""
-
 from __future__ import annotations
 
 import os
