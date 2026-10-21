@@ -1,0 +1,19 @@
+{
+  "experiment": "22-model internal comparison",
+  "dataset_rows": 208547,
+  "train_rows": 167369,
+  "holdout_rows": 41178,
+  "hostname_overlap": 0,
+  "models_requested": 22,
+  "models_successfully_evaluated": 22,
+  "labels": {
+    "0": "legitimate",
+    "1": "phishing"
+  },
+  "model_notes": {
+    "TabNet": "Uses pytorch-tabnet TabNetClassifier on lexical features.",
+    "GNN": "Character-chain message passing, not website relationship graph.",
+    "Vision Transformer": "Transformer over a 2D URL-character grid, not screenshot pixels.",
+    "Multimodal Fusion": "Combines URL lexical features and character sequence."
+  }
+}

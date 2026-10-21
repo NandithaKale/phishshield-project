@@ -1,0 +1,23 @@
+model,prediction_file,rows,tn,fp,fn,tp,result
+Logistic Regression,logistic_regression_holdout.csv,41178,19850,936,2396,17996,PASS: metrics verified
+Random Forest,random_forest_holdout.csv,41178,20136,650,1170,19222,PASS: metrics verified
+Extra Trees,extra_trees_holdout.csv,41178,20159,627,1220,19172,PASS: metrics verified
+Linear SVM,linear_svm_holdout.csv,41178,19815,971,2549,17843,PASS: metrics verified
+XGBoost,xgboost_holdout.csv,41178,20036,750,1103,19289,PASS: metrics verified
+LightGBM,lightgbm_holdout.csv,41178,20111,675,1108,19284,PASS: metrics verified
+HistGradientBoosting,histgradientboosting_holdout.csv,41178,20105,681,1091,19301,PASS: metrics verified
+CatBoost,catboost_holdout.csv,41178,20082,704,1101,19291,PASS: metrics verified
+FNN,fnn_holdout.csv,41178,19878,908,1028,19364,PASS: metrics verified
+DNN,dnn_holdout.csv,41178,19888,898,1032,19360,PASS: metrics verified
+Wide & Deep,wide_deep_holdout.csv,41178,19826,960,1008,19384,PASS: metrics verified
+TabNet,tabnet_holdout.csv,41178,19204,1582,1155,19237,PASS: metrics verified
+Character CNN,character_cnn_holdout.csv,41178,20413,373,114,20278,PASS: metrics verified
+URL Transformer,url_transformer_holdout.csv,41178,20372,414,446,19946,PASS: metrics verified
+Random Forest + XGBoost,random_forest_xgboost_holdout.csv,41178,20084,702,1077,19315,PASS: metrics verified
+Random Forest + Character CNN,random_forest_character_cnn_holdout.csv,41178,20375,411,106,20286,PASS: metrics verified
+Character CNN + XGBoost,character_cnn_xgboost_holdout.csv,41178,20365,421,93,20299,PASS: metrics verified
+Random Forest + Character CNN + XGBoost,random_forest_character_cnn_xgboost_holdout.csv,41178,20274,512,868,19524,PASS: metrics verified
+CNN-LSTM,cnn_lstm_holdout.csv,41178,20618,168,249,20143,PASS: metrics verified
+GNN,gnn_holdout.csv,41178,20248,538,296,20096,PASS: metrics verified
+Vision Transformer,vision_transformer_holdout.csv,41178,20365,421,342,20050,PASS: metrics verified
+Multimodal Fusion,multimodal_fusion_holdout.csv,41178,20612,174,183,20209,PASS: metrics verified

@@ -1,0 +1,23 @@
+model,status,error,elapsed_seconds
+Logistic Regression,OK,,2.25
+Random Forest,OK,,7.6
+Extra Trees,OK,,7.45
+Linear SVM,OK,,1.49
+XGBoost,OK,,1.16
+LightGBM,OK,,0.99
+HistGradientBoosting,OK,,4.03
+CatBoost,OK,,2.0
+FNN,OK,,17.17
+DNN,OK,,14.26
+Wide & Deep,OK,,14.15
+TabNet,OK,,75.18
+Character CNN,OK,,251.0
+URL Transformer,OK,,2023.49
+Random Forest + XGBoost,OK,,5.92
+Random Forest + Character CNN,OK,,253.98
+Character CNN + XGBoost,OK,,298.18
+Random Forest + Character CNN + XGBoost,OK,,494.08
+CNN-LSTM,OK,,1307.18
+GNN,OK,,124.13
+Vision Transformer,OK,,113.25
+Multimodal Fusion,OK,,254.05

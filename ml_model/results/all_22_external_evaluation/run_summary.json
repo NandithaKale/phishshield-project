@@ -1,0 +1,43 @@
+{
+  "experiment": "Freshly retrained 22-model external evaluation",
+  "models_requested": 22,
+  "models_completed": 22,
+  "label_convention": {
+    "0": "legitimate",
+    "1": "phishing"
+  },
+  "threshold": 0.5,
+  "feature_names": [
+    "length",
+    "dots",
+    "hyphens",
+    "slashes",
+    "equals",
+    "https",
+    "http",
+    "at",
+    "digits",
+    "suspicious_present",
+    "suspicious_count",
+    "suspicious_tld",
+    "subdomains",
+    "hyphen_domain",
+    "digit_domain",
+    "host_length",
+    "long_url",
+    "ip_host",
+    "lookalike_domain"
+  ],
+  "datasets": {
+    "LegitPhish": 72806,
+    "Balanced_340k": 339502,
+    "OpenPhish": 300
+  },
+  "limitations": [
+    "Fresh models were retrained; weights from previous run were not saved/reused.",
+    "OpenPhish is phishing-only and cannot independently establish accuracy or false-positive rate.",
+    "Web Fraud skipped because verdict mapping was not verified.",
+    "lookalike_domain remains fixed at zero, matching the original comparison.",
+    "GNN is character-chain message passing; Vision Transformer operates on URL characters, not screenshots; fusion combines lexical features and URL characters."
+  ]
+}

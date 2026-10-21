@@ -1,0 +1,23 @@
+model,prediction_file,prediction_rows,metric_mismatches,result
+Logistic Regression,FOUND,41178.0,,PASS
+Random Forest,FOUND,41178.0,,PASS
+Extra Trees,FOUND,41178.0,,PASS
+Linear SVM,FOUND,41178.0,,PASS
+XGBoost,FOUND,41178.0,,PASS
+LightGBM,FOUND,41178.0,,PASS
+HistGradientBoosting,FOUND,41178.0,,PASS
+CatBoost,FOUND,41178.0,,PASS
+FNN,FOUND,41178.0,,PASS
+DNN,FOUND,41178.0,,PASS
+Wide & Deep,MISSING,,,CANNOT VERIFY
+TabNet,FOUND,41178.0,,PASS
+Character CNN,FOUND,41178.0,,PASS
+URL Transformer,FOUND,41178.0,,PASS
+Random Forest + XGBoost,MISSING,,,CANNOT VERIFY
+Random Forest + Character CNN,MISSING,,,CANNOT VERIFY
+Character CNN + XGBoost,MISSING,,,CANNOT VERIFY
+Random Forest + Character CNN + XGBoost,MISSING,,,CANNOT VERIFY
+CNN-LSTM,FOUND,41178.0,,PASS
+GNN,FOUND,41178.0,,PASS
+Vision Transformer,FOUND,41178.0,,PASS
+Multimodal Fusion,FOUND,41178.0,,PASS

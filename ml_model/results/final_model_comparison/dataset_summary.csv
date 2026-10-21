@@ -1,0 +1,10 @@
+item,value
+unique_urls,208547
+legitimate,104014
+phishing,104533
+train_rows,167369
+holdout_rows,41178
+train_hosts,148247
+holdout_hosts,37062
+shared_hosts,0
+conflicting_label_urls_excluded,0
