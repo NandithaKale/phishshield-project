@@ -1,0 +1,17 @@
+{
+  "seed": 42,
+  "training_file": "C:\\Users\\nandi\\phishshield-project\\ml_model\\external_data\\labelled_test\\phishing_url_dataset.csv",
+  "external_file": "C:\\Users\\nandi\\phishshield-project\\ml_model\\external_data\\alternative_test\\clean_external_test.csv",
+  "source_training_label_mapping": "0=phishing, 1=legitimate",
+  "internal_label_mapping": "0=legitimate, 1=phishing",
+  "training_urls": 170307,
+  "validation_urls": 29693,
+  "external_urls": 8547,
+  "exact_url_overlap": 0,
+  "hostname_overlap_train_validation": 0,
+  "cnn_epochs_completed": 6,
+  "threshold_used_for_report": 0.5,
+  "rf_features": "19 lightweight lexical features; not the production security-aware extractor",
+  "runtime_seconds": 413.02,
+  "warning": "The 200k dataset was used in prior threshold experiments. The external dataset is a stronger check, but exact URL deduplication alone does not guarantee domain/campaign independence."
+}

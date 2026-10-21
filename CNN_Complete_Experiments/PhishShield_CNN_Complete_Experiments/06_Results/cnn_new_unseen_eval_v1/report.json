@@ -1,0 +1,38 @@
+[
+  {
+    "dataset": "dns_feature_94k.xlsx",
+    "rows_evaluated": 94158,
+    "threshold": 0.5,
+    "accuracy": 0.5911340512755157,
+    "precision_phishing": 0.5651566553582119,
+    "phishing_recall": 0.970664731143773,
+    "f1_phishing": 0.7143768640660009,
+    "false_positive_rate": 0.8313247604299917,
+    "roc_auc": 0.8323890400219798,
+    "tn": 7516,
+    "fp": 37043,
+    "fn": 1455,
+    "tp": 48144,
+    "exact_url_overlap_with_candidate_training_pool": 1446,
+    "overlap_fraction": 0.015357165615242465,
+    "note": "Existing saved candidate; no retraining; threshold 0.5. Exact URL overlap does not rule out shared domains or campaigns. Verify original dataset provenance."
+  },
+  {
+    "dataset": "merged_features_final.xlsx",
+    "rows_evaluated": 59971,
+    "threshold": 0.5,
+    "accuracy": 0.5922362475196344,
+    "precision_phishing": 0.5659577604953743,
+    "phishing_recall": 0.971466531696824,
+    "f1_phishing": 0.7152339474113235,
+    "false_positive_rate": 0.8304947283049473,
+    "roc_auc": 0.8321927751164719,
+    "tn": 4807,
+    "fp": 23552,
+    "fn": 902,
+    "tp": 30710,
+    "exact_url_overlap_with_candidate_training_pool": 943,
+    "overlap_fraction": 0.015724266728918978,
+    "note": "Existing saved candidate; no retraining; threshold 0.5. Exact URL overlap does not rule out shared domains or campaigns. Verify original dataset provenance."
+  }
+]

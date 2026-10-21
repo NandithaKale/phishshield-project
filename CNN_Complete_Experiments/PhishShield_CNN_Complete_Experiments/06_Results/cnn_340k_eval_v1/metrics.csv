@@ -1,0 +1,2 @@
+dataset,rows_evaluated,threshold,accuracy,precision_phishing,phishing_recall,f1_phishing,false_positive_rate,roc_auc,tn,fp,fn,tp,exact_url_overlap,overlap_fraction,note
+balanced_urls_340k.csv,339511,0.5,0.7206688443084318,0.6611953443392968,0.9034994572655624,0.7635861436292204,0.4616380096353508,0.8570042415703694,91521,78478,16358,153154,9,2.6508714003375444e-05,Existing candidate; no retraining. Exact URL overlap does not rule out shared domains or campaigns.

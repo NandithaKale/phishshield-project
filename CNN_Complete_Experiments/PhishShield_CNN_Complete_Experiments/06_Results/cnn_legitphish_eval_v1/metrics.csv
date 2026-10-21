@@ -1,0 +1,2 @@
+model,dataset,rows,threshold,provisional_source_label_mapping,mapping_verified_from_documentation,accuracy,precision_phishing,phishing_recall,f1_phishing,false_positive_rate,roc_auc,tn,fp,fn,tp,warning
+character_cnn_candidate.keras,url_features_extracted1.csv,100202,0.5,"0=phishing, 1=legitimate",False,0.9963174387736772,0.9978318055001992,0.9962911082104995,0.9970608616693349,0.0036383092562867845,0.9996300238272474,37244,136,233,62589,Provisional label mapping; verify from source documentation. Do not treat as final evidence until verified.

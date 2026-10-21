@@ -1,0 +1,18 @@
+{
+  "model": "character_cnn_candidate.keras",
+  "dataset": "ml_model\\dataset\\phishing.csv",
+  "rows_evaluated": 507056,
+  "threshold": 0.5,
+  "label_mapping": "0=legitimate, 1=phishing",
+  "accuracy": 0.46563298728345587,
+  "precision_phishing": 0.28895350402498454,
+  "phishing_recall": 0.9400049047085202,
+  "f1_phishing": 0.4420291347306252,
+  "false_positive_rate": 0.6722256159641621,
+  "roc_auc": 0.8344665798257398,
+  "tn": 128776,
+  "fp": 264104,
+  "fn": 6850,
+  "tp": 107326,
+  "warning": "The candidate CNN was trained using the original dataset. These metrics measure performance on data that may have been seen during training and do not establish independent generalization."
+}
