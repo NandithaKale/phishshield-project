@@ -1,0 +1,18 @@
+{
+  "dataset": "balanced_urls_340k.csv",
+  "rows_evaluated": 339511,
+  "threshold": 0.5,
+  "accuracy": 0.7206688443084318,
+  "precision_phishing": 0.6611953443392968,
+  "phishing_recall": 0.9034994572655624,
+  "f1_phishing": 0.7635861436292204,
+  "false_positive_rate": 0.4616380096353508,
+  "roc_auc": 0.8570042415703694,
+  "tn": 91521,
+  "fp": 78478,
+  "fn": 16358,
+  "tp": 153154,
+  "exact_url_overlap": 9,
+  "overlap_fraction": 2.6508714003375444e-05,
+  "note": "Existing candidate; no retraining. Exact URL overlap does not rule out shared domains or campaigns."
+}

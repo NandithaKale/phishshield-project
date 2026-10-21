@@ -1,0 +1,2 @@
+model,threshold,accuracy,precision_phishing,phishing_recall,f1_phishing,false_positive_rate,roc_auc,tn,fp,fn,tp,training_urls,validation_urls,hostname_overlap,note
+Character CNN candidate,0.5,0.9909546115328703,0.98947983635301,0.9923152067730381,0.9908954932691683,0.010384615384615384,0.9988059410197966,15438,162,118,15237,177592,30955,0,Combined grouped validation only; not an untouched external test. Threshold is the default 0.5.

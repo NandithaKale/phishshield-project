@@ -1,0 +1,19 @@
+{
+  "model": "character_cnn_candidate.keras",
+  "dataset": "url_features_extracted1.csv",
+  "rows": 100202,
+  "threshold": 0.5,
+  "provisional_source_label_mapping": "0=phishing, 1=legitimate",
+  "mapping_verified_from_documentation": false,
+  "accuracy": 0.9963174387736772,
+  "precision_phishing": 0.9978318055001992,
+  "phishing_recall": 0.9962911082104995,
+  "f1_phishing": 0.9970608616693349,
+  "false_positive_rate": 0.0036383092562867845,
+  "roc_auc": 0.9996300238272474,
+  "tn": 37244,
+  "fp": 136,
+  "fn": 233,
+  "tp": 62589,
+  "warning": "Provisional label mapping; verify from source documentation. Do not treat as final evidence until verified."
+}

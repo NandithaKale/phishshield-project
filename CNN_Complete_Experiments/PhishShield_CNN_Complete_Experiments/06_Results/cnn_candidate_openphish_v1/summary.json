@@ -1,0 +1,21 @@
+{
+  "evaluation_time_utc": "2026-10-20T20:47:23.746982+00:00",
+  "model": "ml_model\\results\\cnn_candidate_domain_adapt_v1\\character_cnn_candidate.keras",
+  "feed": "ml_model\\external_data\\openphish_feed.txt",
+  "threshold": 0.5,
+  "unique_urls_processed": 300,
+  "predicted_phishing": 267,
+  "predicted_legitimate": 33,
+  "phishing_prediction_rate": 0.89,
+  "exact_training_overlap_count": 0,
+  "nonoverlapping_url_count": 300,
+  "nonoverlapping_predicted_phishing": 267,
+  "nonoverlapping_phishing_prediction_rate": 0.89,
+  "invalid_lines_skipped": 0,
+  "duplicate_urls_skipped": 0,
+  "accuracy": null,
+  "precision": null,
+  "recall": null,
+  "false_positive_rate": null,
+  "interpretation": "Phishing-only feed: prediction rates only. Accuracy, precision, recall and false-positive rate cannot be measured from this feed alone."
+}
